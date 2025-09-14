@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>InvestoPlay</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; background:#f4f6fa; color:#333; }
+  header { background:#2c3e50; color:white; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
+  .container { padding:20px; display:flex; gap:20px; }
+  .sidebar { width:250px; background:white; padding:15px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+  .stock { margin:15px 0; padding:10px; border:1px solid #ddd; border-radius:8px; cursor:pointer; transition:0.3s; }
+  .stock:hover { background:#f0f0f0; }
+  .main { flex:1; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+  button { margin:5px; padding:8px 14px; border:none; border-radius:5px; cursor:pointer; }
+  .buy { background:#27ae60; color:white; }
+  .sell { background:#c0392b; color:white; }
+  #balance { font-size:18px; margin-bottom:10px; }
+  canvas { width:100% !important; height:300px !important; }
+  #loginBox { width:300px; margin:100px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); }
+  #loginBox input { width:100%; padding:8px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
+  #loginBox button { width:100%; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<header>💹 InvestoPlay – Dummy Investment Game</header>
+
+<div id="loginBox">
+  <h3>Login / Signup</h3>
+  <input type="text" id="username" placeholder="Enter Username">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button onclick="login()">Login / Signup</button>
+</div>
+
+<div id="game" style="display:none;">
+  <div class="container">
+    <div class="sidebar">
+      <h3>Available Stocks</h3>
+      <div class="stock" onclick="selectStock('TechNova')">TechNova 💻</div>
+      <div class="stock" onclick="selectStock('GreenFuture')">GreenFuture 🌱</div>
+      <div class="stock" onclick="selectStock('SkylineAir')">SkylineAir ✈️</div>
+    </div>
+
+    <div class="main">
+      <div id="balance">💰 Balance: ₹10000</div>
+      <h2 id="stockTitle">Select a stock</h2>
+      <div id="stockInfo">Click on a stock to view details.</div>
+      <canvas id="stockChart"></canvas>
+      <div id="actions" style="margin-top:15px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let balance = 10000;
+let stocks = {
+  "TechNova": { price: 1000, history: [1000], holdings: [] },
+  "GreenFuture": { price: 950, history: [950], holdings: [] },
+  "SkylineAir": { price: 1100, history: [1100], holdings: [] }
+};
+let currentStock = null;
+let chart;
+let user = null;
+
+function saveData() {
+  if (user) {
+    localStorage.setItem(user, JSON.stringify({ balance, stocks }));
+  }
+}
+
+function loadData() {
+  let data = localStorage.getItem(user);
+  if (data) {
+    let parsed = JSON.parse(data);
+    balance = parsed.balance;
+    stocks = parsed.stocks;
+  }
+}
+
+function login() {
+  let uname = document.getElementById("username").value.trim();
+  let pass = document.getElementById("password").value.trim();
+  if (!uname || !pass) {
+    alert("Enter both username and password!");
+    return;
+  }
+  user = uname + "_" + pass; // simple unique key
+  loadData();
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  updateBalance();
+}
+
+function updateBalance() {
+  document.getElementById("balance").innerText = "💰 Balance: ₹" + balance.toFixed(2);
+  saveData();
+}
+
+function selectStock(name) {
+  currentStock = name;
+  document.getElementById("stockTitle").innerText = `${name} – ₹${stocks[name].price}`;
+  document.getElementById("stockInfo").innerHTML = `
+    Current Price: ₹${stocks[name].price}<br>
+    Holdings: ${stocks[name].holdings.length} shares
+  `;
+  document.getElementById("actions").innerHTML = `
+    <button class="buy" onclick="buyStock('${name}')">Buy</button>
+    <button class="sell" onclick="sellStock('${name}')">Sell</button>
+  `;
+  renderChart(name);
+}
+
+function renderChart(stockName) {
+  let ctx = document.getElementById("stockChart").getContext("2d");
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: Array(stocks[stockName].history.length).fill(""),
+      datasets: [{
+        label: stockName,
+        data: stocks[stockName].history,
+        borderColor: "#3498db",
+        backgroundColor: "rgba(52,152,219,0.2)",
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins:{legend:{display:false}},
+      animation:{duration:500},
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+}
+
+function buyStock(stockName) {
+  let stock = stocks[stockName];
+  if (balance >= stock.price) {
+    balance -= stock.price;
+    stock.holdings.push(stock.price);
+    updateBalance();
+    selectStock(stockName);
+  } else {
+    alert("Not enough balance!");
+  }
+}
+
+function sellStock(stockName) {
+  let stock = stocks[stockName];
+  if (stock.holdings.length > 0) {
+    let buyPrice = stock.holdings.shift();
+    balance += stock.price;
+    updateBalance();
+    let profit = stock.price - buyPrice;
+    alert(profit >= 0 
+      ? `You sold for ₹${stock.price}. Profit: +₹${profit}` 
+      : `You sold for ₹${stock.price}. Loss: ₹${profit}`);
+    selectStock(stockName);
+  } else {
+    alert("No holdings to sell!");
+  }
+}
+
+function updateStocks() {
+  for (let name in stocks) {
+    let change = (Math.random() * 40 - 10).toFixed(2); // slight upward bias
+    let newPrice = Math.max(100, (stocks[name].price + parseFloat(change)).toFixed(2));
+    stocks[name].price = newPrice;
+    stocks[name].history.push(newPrice);
+    if (stocks[name].history.length > 20) stocks[name].history.shift();
+  }
+  if (currentStock) {
+    selectStock(currentStock);
+  }
+  saveData();
+}
+
+setInterval(updateStocks, 5000);
+</script>
+
+</body>
+</html>
