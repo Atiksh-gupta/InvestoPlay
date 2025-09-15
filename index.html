@@ -1,189 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>InvestoPlay</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  body { font-family: Arial, sans-serif; margin:0; background:#f4f6fa; color:#333; }
-  header { background:#2c3e50; color:white; padding:15px; text-align:center; font-size:24px; font-weight:bold; }
-  .container { padding:20px; display:flex; gap:20px; }
-  .sidebar { width:250px; background:white; padding:15px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-  .stock { margin:15px 0; padding:10px; border:1px solid #ddd; border-radius:8px; cursor:pointer; transition:0.3s; }
-  .stock:hover { background:#f0f0f0; }
-  .main { flex:1; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-  button { margin:5px; padding:8px 14px; border:none; border-radius:5px; cursor:pointer; }
-  .buy { background:#27ae60; color:white; }
-  .sell { background:#c0392b; color:white; }
-  #balance { font-size:18px; margin-bottom:10px; }
-  canvas { width:100% !important; height:300px !important; }
-  #loginBox { width:300px; margin:100px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); }
-  #loginBox input { width:100%; padding:8px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
-  #loginBox button { width:100%; margin-top:10px; }
-</style>
+  <meta charset="UTF-8">
+  <title>InvestoPlay</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ===== General Layout ===== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9fafc;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: linear-gradient(90deg, #007bff, #00b4d8);
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== Navigation Tabs ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+nav button {
+  margin: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+nav button:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* ===== Sections ===== */
+.tab {
+  display: none;
+  padding: 20px;
+  background: #fff;
+  margin: 20px auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  max-width: 800px;
+}
+
+h2 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+/* ===== Stock Info Cards ===== */
+.stockInfo {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1.6;
+  border: 1px solid #e2e8f0;
+}
+
+/* ===== Buy/Sell Buttons ===== */
+.stockActions {
+  margin-top: 15px;
+}
+.stockActions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  margin-right: 10px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+.stockActions button:hover { opacity: 0.9; }
+.stockActions button:first-child {
+  background: #28a745;
+}
+.stockActions .sell {
+  background: #dc3545;
+}
+
+/* ===== Balance Display ===== */
+#balance {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 15px auto;
+  text-align: center;
+}
+
+/* ===== Login/Signup Section ===== */
+#loginSection {
+  max-width: 400px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+}
+#loginSection h2 {
+  margin-bottom: 20px;
+}
+input {
+  width: 80%;
+  padding: 10px;
+  margin: 8px auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+#loginSection button {
+  width: 40%;
+  margin: 8px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+  transition: 0.2s;
+  cursor: pointer;
+}
+#loginSection button:hover {
+  background: #0056b3;
+}
+#loginMsg {
+  margin-top: 10px;
+  color: red;
+  font-size: 14px;
+}
+
+  </style>
 </head>
 <body>
-
-<header>💹 InvestoPlay – Dummy Investment Game</header>
-
-<div id="loginBox">
-  <h3>Login / Signup</h3>
-  <input type="text" id="username" placeholder="Enter Username">
-  <input type="password" id="password" placeholder="Enter Password">
-  <button onclick="login()">Login / Signup</button>
-</div>
-
-<div id="game" style="display:none;">
-  <div class="container">
-    <div class="sidebar">
-      <h3>Available Stocks</h3>
-      <div class="stock" onclick="selectStock('TechNova')">TechNova 💻</div>
-      <div class="stock" onclick="selectStock('GreenFuture')">GreenFuture 🌱</div>
-      <div class="stock" onclick="selectStock('SkylineAir')">SkylineAir ✈️</div>
-    </div>
-
-    <div class="main">
-      <div id="balance">💰 Balance: ₹10000</div>
-      <h2 id="stockTitle">Select a stock</h2>
-      <div id="stockInfo">Click on a stock to view details.</div>
-      <canvas id="stockChart"></canvas>
-      <div id="actions" style="margin-top:15px;"></div>
-    </div>
+  <header>📈 InvestoPlay — Dummy Investment Simulator</header>
+  
+  <div id="loginSection">
+    <h2>Login / Signup</h2>
+    <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="signup()">Signup</button>
+    <button onclick="login()">Login</button>
+    <p id="loginMsg"></p>
   </div>
-</div>
+
+  <div id="appSection" style="display:none;">
+    <nav id="stockTabs"></nav>
+    <p id="balance">Balance: ₹10000</p>
+    <div id="stockContainers"></div>
+  </div>
 
 <script>
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let currentUser = null;
 let balance = 10000;
-let stocks = {
-  "TechNova": { price: 1000, history: [1000], holdings: [] },
-  "GreenFuture": { price: 950, history: [950], holdings: [] },
-  "SkylineAir": { price: 1100, history: [1100], holdings: [] }
-};
-let currentStock = null;
-let chart;
-let user = null;
+let stocks = {};
+let charts = {};
 
-function saveData() {
-  if (user) {
-    localStorage.setItem(user, JSON.stringify({ balance, stocks }));
-  }
+const stockList = [
+  "TechNova", "GreenEnergy", "FoodiesHub", "AeroMax", "CryptoWave", 
+  "HealthFirst", "EduGrow", "GameX", "RoboWorks", "AutoDrive", 
+  "FashionFi", "BuildPro"
+];
+
+// Signup
+function signup() {
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+  if (!user || !pass) return alert("Enter username and password!");
+  if (users[user]) return alert("User already exists!");
+  users[user] = { password: pass, balance: 10000, portfolio: {} };
+  localStorage.setItem("users", JSON.stringify(users));
+  alert("Signup successful! Login now.");
 }
 
-function loadData() {
-  let data = localStorage.getItem(user);
-  if (data) {
-    let parsed = JSON.parse(data);
-    balance = parsed.balance;
-    stocks = parsed.stocks;
-  }
-}
-
+// Login
 function login() {
-  let uname = document.getElementById("username").value.trim();
-  let pass = document.getElementById("password").value.trim();
-  if (!uname || !pass) {
-    alert("Enter both username and password!");
-    return;
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+  if (users[user] && users[user].password === pass) {
+    currentUser = user;
+    balance = users[user].balance;
+    stocks = users[user].portfolio || {};
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("appSection").style.display = "block";
+    loadStocks();
+    updateBalance();
+  } else {
+    document.getElementById("loginMsg").innerText = "Invalid login!";
   }
-  user = uname + "_" + pass; // simple unique key
-  loadData();
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("game").style.display = "block";
-  updateBalance();
 }
 
-function updateBalance() {
-  document.getElementById("balance").innerText = "💰 Balance: ₹" + balance.toFixed(2);
-  saveData();
-}
+// Load Stocks UI
+function loadStocks() {
+  let tabs = document.getElementById("stockTabs");
+  let containers = document.getElementById("stockContainers");
+  tabs.innerHTML = "";
+  containers.innerHTML = "";
+  stockList.forEach((stock, i) => {
+    // Tab button
+    let btn = document.createElement("button");
+    btn.innerText = stock;
+    btn.onclick = () => showTab(stock);
+    tabs.appendChild(btn);
 
-function selectStock(name) {
-  currentStock = name;
-  document.getElementById("stockTitle").innerText = `${name} – ₹${stocks[name].price}`;
-  document.getElementById("stockInfo").innerHTML = `
-    Current Price: ₹${stocks[name].price}<br>
-    Holdings: ${stocks[name].holdings.length} shares
-  `;
-  document.getElementById("actions").innerHTML = `
-    <button class="buy" onclick="buyStock('${name}')">Buy</button>
-    <button class="sell" onclick="sellStock('${name}')">Sell</button>
-  `;
-  renderChart(name);
-}
+    // Tab content
+    let div = document.createElement("div");
+    div.id = stock;
+    div.className = "tab";
+    div.innerHTML = `
+      <h2>${stock}</h2>
+      <canvas id="chart-${stock}"></canvas>
+      <div class="stockInfo" id="info-${stock}"></div>
+      <div class="stockActions">
+        <button onclick="buyStock('${stock}')">Buy</button>
+        <button class="sell" onclick="sellStock('${stock}')">Sell</button>
+      </div>
+    `;
+    containers.appendChild(div);
 
-function renderChart(stockName) {
-  let ctx = document.getElementById("stockChart").getContext("2d");
-  if (chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: Array(stocks[stockName].history.length).fill(""),
-      datasets: [{
-        label: stockName,
-        data: stocks[stockName].history,
-        borderColor: "#3498db",
-        backgroundColor: "rgba(52,152,219,0.2)",
-        borderWidth: 2,
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins:{legend:{display:false}},
-      animation:{duration:500},
-      scales: {
-        y: { beginAtZero: false }
-      }
-    }
+    // Init stock
+    if (!stocks[stock]) stocks[stock] = { price: 1000+Math.random()*200, owned: 0, buyPrice: null, history: [] };
+
+    // Chart
+    let ctx = div.querySelector(`#chart-${stock}`);
+    charts[stock] = new Chart(ctx, {
+      type: "line",
+      data: { labels: [], datasets: [{ label: stock, data: [], borderColor: "#007bff", fill: false }] },
+      options: { responsive:true, scales:{ y:{ beginAtZero:false } } }
+    });
   });
+  showTab(stockList[0]);
+  setInterval(updatePrices, 5000);
 }
 
-function buyStock(stockName) {
-  let stock = stocks[stockName];
-  if (balance >= stock.price) {
-    balance -= stock.price;
-    stock.holdings.push(stock.price);
-    updateBalance();
-    selectStock(stockName);
-  } else {
-    alert("Not enough balance!");
-  }
+// Show tab
+function showTab(stock) {
+  document.querySelectorAll(".tab").forEach(tab => tab.style.display = "none");
+  document.getElementById(stock).style.display = "block";
+  updateStockInfo(stock);
 }
 
-function sellStock(stockName) {
-  let stock = stocks[stockName];
-  if (stock.holdings.length > 0) {
-    let buyPrice = stock.holdings.shift();
-    balance += stock.price;
-    updateBalance();
-    let profit = stock.price - buyPrice;
-    alert(profit >= 0 
-      ? `You sold for ₹${stock.price}. Profit: +₹${profit}` 
-      : `You sold for ₹${stock.price}. Loss: ₹${profit}`);
-    selectStock(stockName);
-  } else {
-    alert("No holdings to sell!");
-  }
-}
+// Update prices
+function updatePrices() {
+  stockList.forEach(stock => {
+    let change = (Math.random()-0.5)*50;
+    stocks[stock].price = Math.max(100, stocks[stock].price + change);
+    stocks[stock].history.push(stocks[stock].price.toFixed(2));
+    if (stocks[stock].history.length > 20) stocks[stock].history.shift();
 
-function updateStocks() {
-  for (let name in stocks) {
-    let change = (Math.random() * 40 - 10).toFixed(2); // slight upward bias
-    let newPrice = Math.max(100, (stocks[name].price + parseFloat(change)).toFixed(2));
-    stocks[name].price = newPrice;
-    stocks[name].history.push(newPrice);
-    if (stocks[name].history.length > 20) stocks[name].history.shift();
-  }
-  if (currentStock) {
-    selectStock(currentStock);
-  }
+    let chart = charts[stock];
+    chart.data.labels = Array(stocks[stock].history.length).fill("");
+    chart.data.datasets[0].data = stocks[stock].history;
+    chart.data.datasets[0].borderColor = (change >= 0 ? "green" : "red");
+    chart.update();
+    updateStockInfo(stock);
+  });
   saveData();
 }
 
-setInterval(updateStocks, 5000);
-</script>
+// Update balance + stock info
+function updateBalance() {
+  document.getElementById("balance").innerText = `Balance: ₹${balance.toFixed(2)}`;
+}
+function updateStockInfo(stock) {
+  let s = stocks[stock];
+  let info = `Current Price: ₹${s.price.toFixed(2)}<br>Owned: ${s.owned}`;
+  if (s.owned > 0) info += `<br>Buy Price: ₹${s.buyPrice}`;
+  document.getElementById(`info-${stock}`).innerHTML = info;
+}
 
+// Buy
+function buyStock(stock) {
+  let s = stocks[stock];
+  if (balance < s.price) return alert("Not enough money!");
+  if (confirm(`Buy 1 share of ${stock} at ₹${s.price.toFixed(2)}?`)) {
+    balance -= s.price;
+    s.owned++;
+    s.buyPrice = s.buyPrice ? ((s.buyPrice*(s.owned-1)+s.price)/s.owned).toFixed(2) : s.price.toFixed(2);
+    updateBalance(); updateStockInfo(stock); saveData();
+  }
+}
+
+// Sell
+function sellStock(stock) {
+  let s = stocks[stock];
+  if (s.owned <= 0) return alert("You don't own this stock!");
+  if (confirm(`Sell 1 share of ${stock} at ₹${s.price.toFixed(2)}?`)) {
+    balance += s.price;
+    s.owned--;
+    if (s.owned === 0) s.buyPrice = null;
+    updateBalance(); updateStockInfo(stock); saveData();
+  }
+}
+
+// Save data
+function saveData() {
+  users[currentUser].balance = balance;
+  users[currentUser].portfolio = stocks;
+  localStorage.setItem("users", JSON.stringify(users));
+}
+</script>
 </body>
 </html>
