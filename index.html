@@ -26,6 +26,7 @@
     #adminPanel { display: none; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     table th, table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    .small-note { font-size: 13px; color:#555; margin-top:8px; }
   </style>
 </head>
 <body>
@@ -95,7 +96,24 @@ function loadStocks(){
       </div>
       <p id="news-${st}"></p>`;
     cont.appendChild(div);
-    if(!stocks[st]) stocks[st]={price:1000+Math.random()*200,owned:0,purchases:[],history:[]};
+
+    // initialize stock structure with positions array (keep previously-stored data compatible)
+    if(!stocks[st]) stocks[st]={ price:1000+Math.random()*200, positions:[], history:[] };
+    else {
+      // If older data uses 'owned' and 'buyPrice', convert to positions (backwards-compat)
+      if(typeof stocks[st].owned !== "undefined" && stocks[st].owned>0) {
+        let qty = stocks[st].owned || 0;
+        let bp = stocks[st].buyPrice || stocks[st].buyPrice===0 ? stocks[st].buyPrice : stocks[st].price;
+        stocks[st].positions = stocks[st].positions || [];
+        if(qty>0) stocks[st].positions.push({ qty: qty, price: parseFloat(bp) });
+        delete stocks[st].owned;
+        delete stocks[st].buyPrice;
+      }
+      stocks[st].positions = stocks[st].positions || [];
+      stocks[st].price = stocks[st].price || (1000+Math.random()*200);
+      stocks[st].history = stocks[st].history || [];
+    }
+
     let ctx=div.querySelector(`#chart-${st}`);
     charts[st]=new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label:st,data:[],borderColor:"#007bff",fill:false}]},options:{scales:{y:{beginAtZero:false}}}});
   });
@@ -106,63 +124,103 @@ function loadStocks(){
 }
 
 // Show tab
-function showTab(tab){ document.querySelectorAll(".tab").forEach(t=>t.style.display="none"); document.getElementById(tab).style.display="block"; if(tab==="portfolio") showPortfolio(); if(tab==="adminPanel") showAdminPanel(); else updateStockInfo(tab); }
+function showTab(tab){ 
+  document.querySelectorAll(".tab").forEach(t=>t.style.display="none"); 
+  let el = document.getElementById(tab);
+  if(!el) return;
+  el.style.display="block"; 
+  if(tab==="portfolio") showPortfolio(); 
+  else if(tab==="adminPanel") showAdminPanel(); 
+  else updateStockInfo(tab); 
+}
 
 // Update prices
 function updatePrices(){
   stockList.forEach(st=>{
-    let ch=(Math.random()-0.5)*100; stocks[st].price=Math.max(100,stocks[st].price+ch); stocks[st].history.push(stocks[st].price.toFixed(2)); if(stocks[st].history.length>20) stocks[st].history.shift();
-    let chart=charts[st]; chart.data.labels=Array(stocks[st].history.length).fill(""); chart.data.datasets[0].data=stocks[st].history; chart.data.datasets[0].borderColor=(ch>=0?"green":"red"); chart.update();
+    let ch=(Math.random()-0.5)*100; 
+    stocks[st].price=Math.max(100,stocks[st].price+ch); 
+    stocks[st].history.push(stocks[st].price.toFixed(2)); 
+    if(stocks[st].history.length>20) stocks[st].history.shift();
+    let chart=charts[st]; 
+    chart.data.labels=Array(stocks[st].history.length).fill(""); 
+    chart.data.datasets[0].data=stocks[st].history; 
+    chart.data.datasets[0].borderColor=(ch>=0?"green":"red"); 
+    chart.update();
     updateStockInfo(st);
-  }); saveData();
+  }); 
+  saveData();
 }
 
 // Update info
 function updateBalance(){ document.getElementById("balance").innerText=`Balance: ₹${balance.toFixed(2)}`; }
-function updateStockInfo(st){ 
-  let s=stocks[st]; 
-  let inf=`Current Price: ₹${s.price.toFixed(2)}<br>Owned: ${s.owned}`;
-  if(s.owned>0 && s.purchases.length>0) inf+=`<br>Buy Prices: ${s.purchases.join(", ")}`;
-  document.getElementById(`info-${st}`).innerHTML=inf; 
-  document.getElementById(`news-${st}`).innerText=`${st} ${newsHeadlines[Math.floor(Math.random()*newsHeadlines.length)]}`; 
+function updateStockInfo(st){
+  let s=stocks[st];
+  // compute total owned from positions
+  let totalOwned = s.positions.reduce((acc,p)=>acc + (p.qty||0), 0);
+  let inf = `Current Price: ₹${s.price.toFixed(2)}<br>Owned (total): ${totalOwned}`;
+  if(totalOwned>0){
+    // list positions (separate entries)
+    inf += `<div class="small-note">Positions:</div><ul>`;
+    s.positions.forEach((p,idx) => {
+      inf += `<li>Qty: ${p.qty} @ ₹${parseFloat(p.price).toFixed(2)}</li>`;
+    });
+    inf += `</ul>`;
+  }
+  document.getElementById(`info-${st}`).innerHTML=inf;
+  document.getElementById(`news-${st}`).innerText=`${st} ${newsHeadlines[Math.floor(Math.random()*newsHeadlines.length)]}`;
 }
 
-// Buy/Sell with quantity
+// Buy/Sell with quantity (positions kept separate)
 function buyStock(st){
   let qty=parseInt(document.getElementById(`qty-${st}`).value)||1;
   let s=stocks[st], totalCost=s.price*qty;
   if(balance<totalCost) return alert("Not enough money!");
   if(confirm(`Buy ${qty} shares of ${st} for ₹${totalCost.toFixed(2)}?`)){
     balance-=totalCost;
-    for(let i=0;i<qty;i++){ s.purchases.push(s.price.toFixed(2)); }
-    s.owned+=qty;
-    updateBalance(); updateStockInfo(st); saveData();
-  }
-}
-function sellStock(st){
-  let qty=parseInt(document.getElementById(`qty-${st}`).value)||1;
-  let s=stocks[st];
-  if(s.owned<qty) return alert("You don't own enough shares!");
-  if(confirm(`Sell ${qty} shares of ${st} for ₹${(s.price*qty).toFixed(2)}?`)){
-    balance+=s.price*qty;
-    s.owned-=qty;
-    for(let i=0;i<qty;i++){ if(s.purchases.length>0) s.purchases.shift(); }
+    // push a separate position (keeps original buy price)
+    s.positions.push({ qty: qty, price: parseFloat(s.price.toFixed(2)) });
     updateBalance(); updateStockInfo(st); saveData();
   }
 }
 
-// Portfolio (list each buy separately)
+function sellStock(st){
+  let qty=parseInt(document.getElementById(`qty-${st}`).value)||1;
+  let s=stocks[st];
+  let totalOwned = s.positions.reduce((acc,p)=>acc + (p.qty||0), 0);
+  if(totalOwned<qty) return alert("You don't own enough shares!");
+  if(confirm(`Sell ${qty} shares of ${st} for ₹${(s.price*qty).toFixed(2)}?`)){
+    // FIFO: reduce from earliest positions first
+    let remaining = qty;
+    for(let i=0;i<s.positions.length && remaining>0;i++){
+      let pos = s.positions[i];
+      if(pos.qty <= remaining){
+        remaining -= pos.qty;
+        pos.qty = 0;
+      } else {
+        pos.qty -= remaining;
+        remaining = 0;
+      }
+    }
+    // remove zero-qty positions
+    s.positions = s.positions.filter(p => p.qty > 0);
+    balance += s.price * qty;
+    updateBalance(); updateStockInfo(st); saveData();
+  }
+}
+
+// ✅ Portfolio - now lists each position separately (no averaging)
 function showPortfolio(){ 
   let port=document.getElementById("portfolio"); 
-  let html="<h2>📊 Your Portfolio</h2><table><tr><th>Stock</th><th>Buy Price</th><th>Current</th><th>P/L</th></tr>"; 
+  let html="<h2>📊 Your Portfolio</h2><table><tr><th>Stock</th><th>Qty</th><th>Buy Price</th><th>Current Price</th><th>P/L (this position)</th></tr>"; 
   stockList.forEach(st=>{ 
     let s=stocks[st]; 
-    if(s.owned>0 && s.purchases.length>0){ 
-      s.purchases.forEach((buy,i)=>{ 
-        let pl=s.price-parseFloat(buy); 
-        html+=`<tr><td>${st} #${i+1}</td><td>₹${buy}</td><td>₹${s.price.toFixed(2)}</td><td style="color:${pl>=0?"green":"red"}">₹${pl.toFixed(2)}</td></tr>`; 
-      }); 
-    } 
+    // list each position separately
+    s.positions.forEach(pos => {
+      if(pos.qty>0){
+        let pl = (s.price - parseFloat(pos.price)) * pos.qty;
+        html+=`<tr><td>${st}</td><td>${pos.qty}</td><td>₹${parseFloat(pos.price).toFixed(2)}</td><td>₹${s.price.toFixed(2)}</td><td style="color:${pl>=0?"green":"red"}">₹${pl.toFixed(2)}</td></tr>`;
+      }
+    });
   }); 
   html+="</table>"; 
   port.innerHTML=html; 
@@ -174,26 +232,50 @@ function giveMoney(u){ users[u].balance+=1000; localStorage.setItem("users",JSON
 
 // Events & Dividends
 function randomEvents(){ if(Math.random()<0.3){ let st=stockList[Math.floor(Math.random()*stockList.length)]; let boom=Math.random()<0.5; stocks[st].price*=boom?1.3:0.7; alert(boom?`🚀 ${st} skyrocketed!`:`⚠️ ${st} crashed!`); } }
-// Dividends combined
+
+// ✅ Dividends: per-share based, combined alert
 function giveDividends() {
-  if (!currentUser) return;
+  if (!currentUser || currentUser === "admin") return;
+
   let totalDividend = 0;
+  let breakdown = [];
+
   stockList.forEach(stock => {
     let s = stocks[stock];
-    if (s.owned > 0) {
-      let perShare = 200 + Math.random() * 300; 
-      let payout = perShare * s.owned;
-      balance += payout;
-      totalDividend += payout;
+    // count shares owned
+    let totalOwned = s.positions.reduce((acc,p)=>acc + (p.qty||0), 0);
+    if (totalOwned > 0) {
+      // dividend per share depends on company and a random factor (but at least 200 per share)
+      // you asked for "based on number of stocks i have or the specific company" — so dividend_per_share = base + randomness
+      let base = 200; // minimum
+      // small company-specific modifier to make things varied:
+      let companyModifier = (stock.length % 5) * 10; // deterministic small modifier
+      let perShare = base + companyModifier + Math.floor(Math.random()*101); // 200..~400+mod
+      // dividend for this company = perShare * totalOwned
+      let companyDividend = perShare * totalOwned;
+      totalDividend += companyDividend;
+      breakdown.push(`${stock}: ${totalOwned}×₹${perShare} = ₹${companyDividend.toFixed(2)}`);
     }
   });
-  if (totalDividend > 0) alert(`💸 You received ₹${totalDividend.toFixed(2)} in total dividends!`);
-  updateBalance();
-  saveData();
+
+  if (totalDividend > 0) {
+    balance += totalDividend;
+    // Single combined alert, with a compact breakdown
+    let msg = `💸 Total dividends received: ₹${totalDividend.toFixed(2)}\nBreakdown:\n${breakdown.join("\n")}`;
+    alert(msg);
+    updateBalance();
+    saveData();
+  }
 }
 
 // Save
-function saveData(){ if(currentUser!=="admin"){ users[currentUser].balance=balance; users[currentUser].portfolio=stocks; localStorage.setItem("users",JSON.stringify(users)); } }
+function saveData(){ 
+  if(currentUser && currentUser !== "admin"){ 
+    users[currentUser].balance=balance; 
+    users[currentUser].portfolio=stocks; 
+    localStorage.setItem("users",JSON.stringify(users)); 
+  } 
+}
 </script>
 </body>
 </html>
