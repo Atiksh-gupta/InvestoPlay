@@ -95,7 +95,7 @@ function loadStocks(){
       </div>
       <p id="news-${st}"></p>`;
     cont.appendChild(div);
-    if(!stocks[st]) stocks[st]={price:1000+Math.random()*200,owned:0,buyPrice:null,history:[]};
+    if(!stocks[st]) stocks[st]={price:1000+Math.random()*200,owned:0,purchases:[],history:[]};
     let ctx=div.querySelector(`#chart-${st}`);
     charts[st]=new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label:st,data:[],borderColor:"#007bff",fill:false}]},options:{scales:{y:{beginAtZero:false}}}});
   });
@@ -119,7 +119,13 @@ function updatePrices(){
 
 // Update info
 function updateBalance(){ document.getElementById("balance").innerText=`Balance: ₹${balance.toFixed(2)}`; }
-function updateStockInfo(st){ let s=stocks[st]; let inf=`Current Price: ₹${s.price.toFixed(2)}<br>Owned: ${s.owned}`; if(s.owned>0) inf+=`<br>Avg Buy Price: ₹${s.buyPrice}`; document.getElementById(`info-${st}`).innerHTML=inf; document.getElementById(`news-${st}`).innerText=`${st} ${newsHeadlines[Math.floor(Math.random()*newsHeadlines.length)]}`; }
+function updateStockInfo(st){ 
+  let s=stocks[st]; 
+  let inf=`Current Price: ₹${s.price.toFixed(2)}<br>Owned: ${s.owned}`;
+  if(s.owned>0 && s.purchases.length>0) inf+=`<br>Buy Prices: ${s.purchases.join(", ")}`;
+  document.getElementById(`info-${st}`).innerHTML=inf; 
+  document.getElementById(`news-${st}`).innerText=`${st} ${newsHeadlines[Math.floor(Math.random()*newsHeadlines.length)]}`; 
+}
 
 // Buy/Sell with quantity
 function buyStock(st){
@@ -128,8 +134,8 @@ function buyStock(st){
   if(balance<totalCost) return alert("Not enough money!");
   if(confirm(`Buy ${qty} shares of ${st} for ₹${totalCost.toFixed(2)}?`)){
     balance-=totalCost;
+    for(let i=0;i<qty;i++){ s.purchases.push(s.price.toFixed(2)); }
     s.owned+=qty;
-    s.buyPrice=s.buyPrice?(((s.buyPrice*s.owned)+(s.price*qty))/(s.owned)).toFixed(2):s.price.toFixed(2);
     updateBalance(); updateStockInfo(st); saveData();
   }
 }
@@ -140,13 +146,27 @@ function sellStock(st){
   if(confirm(`Sell ${qty} shares of ${st} for ₹${(s.price*qty).toFixed(2)}?`)){
     balance+=s.price*qty;
     s.owned-=qty;
-    if(s.owned===0) s.buyPrice=null;
+    for(let i=0;i<qty;i++){ if(s.purchases.length>0) s.purchases.shift(); }
     updateBalance(); updateStockInfo(st); saveData();
   }
 }
 
-// Portfolio
-function showPortfolio(){ let port=document.getElementById("portfolio"); let html="<h2>📊 Your Portfolio</h2><table><tr><th>Stock</th><th>Owned</th><th>Buy Price</th><th>Current</th><th>P/L</th></tr>"; stockList.forEach(st=>{ let s=stocks[st]; if(s.owned>0){ let pl=(s.price-s.buyPrice)*s.owned; html+=`<tr><td>${st}</td><td>${s.owned}</td><td>₹${s.buyPrice}</td><td>₹${s.price.toFixed(2)}</td><td style="color:${pl>=0?"green":"red"}">₹${pl.toFixed(2)}</td></tr>`; }}); html+="</table>"; port.innerHTML=html; }
+// Portfolio (list each buy separately)
+function showPortfolio(){ 
+  let port=document.getElementById("portfolio"); 
+  let html="<h2>📊 Your Portfolio</h2><table><tr><th>Stock</th><th>Buy Price</th><th>Current</th><th>P/L</th></tr>"; 
+  stockList.forEach(st=>{ 
+    let s=stocks[st]; 
+    if(s.owned>0 && s.purchases.length>0){ 
+      s.purchases.forEach((buy,i)=>{ 
+        let pl=s.price-parseFloat(buy); 
+        html+=`<tr><td>${st} #${i+1}</td><td>₹${buy}</td><td>₹${s.price.toFixed(2)}</td><td style="color:${pl>=0?"green":"red"}">₹${pl.toFixed(2)}</td></tr>`; 
+      }); 
+    } 
+  }); 
+  html+="</table>"; 
+  port.innerHTML=html; 
+}
 
 // Admin Panel
 function showAdminPanel(){ let ad=document.getElementById("adminPanel"); let html="<h2>⚙️ Admin Panel</h2><table><tr><th>User</th><th>Balance</th><th>Actions</th></tr>"; for(let u in users){ html+=`<tr><td>${u}</td><td>₹${users[u].balance}</td><td><button onclick="giveMoney('${u}')">+₹1000</button></td></tr>`; } html+="</table>"; ad.innerHTML=html; }
@@ -154,17 +174,20 @@ function giveMoney(u){ users[u].balance+=1000; localStorage.setItem("users",JSON
 
 // Events & Dividends
 function randomEvents(){ if(Math.random()<0.3){ let st=stockList[Math.floor(Math.random()*stockList.length)]; let boom=Math.random()<0.5; stocks[st].price*=boom?1.3:0.7; alert(boom?`🚀 ${st} skyrocketed!`:`⚠️ ${st} crashed!`); } }
-// Dividends (always at least ₹200 per stock owned)
+// Dividends combined
 function giveDividends() {
   if (!currentUser) return;
+  let totalDividend = 0;
   stockList.forEach(stock => {
     let s = stocks[stock];
     if (s.owned > 0) {
-      let dividend = 200 + Math.random() * 300; // between ₹200–₹500
-      balance += dividend;
-      alert(`💸 You earned ₹${dividend.toFixed(2)} in dividends from ${stock}!`);
+      let perShare = 200 + Math.random() * 300; 
+      let payout = perShare * s.owned;
+      balance += payout;
+      totalDividend += payout;
     }
   });
+  if (totalDividend > 0) alert(`💸 You received ₹${totalDividend.toFixed(2)} in total dividends!`);
   updateBalance();
   saveData();
 }
