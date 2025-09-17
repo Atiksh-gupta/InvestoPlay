@@ -1,186 +1,747 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>InvestoPlay</title>
+  <meta charset="UTF-8" />
+  <title>InvestoPlay — Dummy Investment Simulator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f9fafc; margin: 0; }
-    header { background: linear-gradient(90deg, #007bff, #00b4d8); color: #fff; padding: 20px; text-align: center; font-size: 26px; font-weight: bold; }
-    nav { display: flex; justify-content: center; flex-wrap: wrap; background: #fff; padding: 12px; border-bottom: 1px solid #ddd; }
-    nav button { margin: 6px; padding: 10px 18px; border: none; border-radius: 6px; background: #007bff; color: #fff; cursor: pointer; font-weight: 500; }
-    nav button:hover { background: #0056b3; }
-    .tab { display: none; padding: 20px; background: #fff; margin: 20px auto; border-radius: 10px; max-width: 850px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { color: #007bff; }
-    .stockInfo { margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0; }
-    .stockActions { margin-top: 12px; }
-    .stockActions input { width: 60px; padding: 6px; margin-right: 10px; text-align: center; border-radius: 6px; border: 1px solid #ccc; }
-    .stockActions button { padding: 10px 16px; border: none; border-radius: 6px; color: #fff; margin-right: 10px; font-weight: bold; cursor: pointer; }
-    .stockActions button:first-of-type { background: #28a745; }
-    .stockActions .sell { background: #dc3545; }
-    #balance { font-size: 20px; font-weight: bold; text-align: center; }
-    #loginSection { max-width: 400px; margin: 60px auto; background: #fff; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    input { padding: 10px; margin: 8px auto; border: 1px solid #ccc; border-radius: 6px; }
-    #loginSection button { width: 40%; margin: 8px; padding: 10px; border: none; border-radius: 6px; background: #007bff; color: #fff; font-weight: 600; cursor: pointer; }
-    #loginSection button:hover { background: #0056b3; }
-    #adminPanel { display: none; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    table th, table td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    /* ---------- Base ---------- */
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#0366d6;
+      --accent:#00b4d8;
+      --success:#16a34a;
+      --danger:#dc3545;
+      --glass: rgba(255,255,255,0.7);
+      --shadow: 0 6px 18px rgba(15,23,42,0.06);
+      --radius:12px;
+      --maxw:1100px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #eef4fb);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+    }
+    header{
+      background: linear-gradient(90deg,var(--primary), var(--accent));
+      color: white;
+      padding:28px 20px;
+      text-align:center;
+      box-shadow:var(--shadow);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    header .title{ font-size:20px; font-weight:700; letter-spacing:0.6px; }
+    .container{ max-width:var(--maxw); margin:28px auto; padding:0 18px; }
+
+    /* ---------- Login Card ---------- */
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+    #loginSection{ max-width:420px; margin:52px auto; }
+    .form-row{ margin:12px 0; }
+    input[type="text"], input[type="password"], input[type="number"]{
+      width:100%;
+      padding:12px 14px;
+      border-radius:8px;
+      border:1px solid #e6edf3;
+      background:#fbfdff;
+      font-size:15px;
+    }
+    button.btn{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:10px;
+      border:0;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn-primary{ background:var(--primary); color:white; }
+    .btn-ghost{ background:transparent; border:1px solid #dbeafe; color:var(--primary); }
+    .muted{ color:var(--muted); font-size:14px; }
+
+    /* ---------- App layout ---------- */
+    #appSection{ display:none; }
+    nav#stockTabs{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:18px; }
+    nav#stockTabs button{ padding:10px 14px; border-radius:10px; border:0; cursor:pointer; background:#eef7ff; color:var(--primary); font-weight:600; box-shadow: 0 2px 6px rgba(3,102,214,0.06); }
+    nav#stockTabs button.active{ background:linear-gradient(90deg,var(--primary),var(--accent)); color:white; box-shadow: 0 8px 26px rgba(3,102,214,0.14); transform:translateY(-2px); }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+      max-width:var(--maxw);
+      margin:0 auto;
+    }
+
+    .header-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    #balance{
+      font-size:18px; font-weight:700; color:#0f172a;
+      background:linear-gradient(90deg,#ffffff, #f8fbff);
+      padding:10px 14px; border-radius:10px;
+      box-shadow: 0 4px 10px rgba(2,6,23,0.04);
+    }
+
+    /* ---------- Tab card ---------- */
+    .tab{ display:none; padding:18px; border-radius:12px; background:var(--card); box-shadow:var(--shadow); }
+    .stock-head{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
+    .stock-head h2{ margin:0; color:var(--primary); font-size:18px; }
+    .stockInfo{ margin-top:12px; padding:12px; border-radius:10px; background:#f6fbff; border:1px solid #e6f0ff; color:#05264c; }
+    .positions-list{ margin:8px 0 0 0; padding-left:16px; color: #062a45; }
+    .small-note{ font-size:13px; color:var(--muted); margin-top:8px; }
+
+    .stockActions{ display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+    .stockActions input{ width:92px; }
+
+    /* ---------- Portfolio table ---------- */
+    table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+    table th, table td{ text-align:left; padding:10px; border-bottom:1px solid #eef2f7; }
+    table th{ color:var(--muted); font-weight:600; background:#fbfdff; border-bottom: 2px solid #eef2f7; }
+    .pl-positive{ color:var(--success); font-weight:700; }
+    .pl-negative{ color:var(--danger); font-weight:700; }
+
+    /* ---------- Admin UI ---------- */
+    .admin-controls{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .admin-panel-grid{ display:grid; grid-template-columns:1fr 360px; gap:18px; }
+    .user-list{ max-height:400px; overflow:auto; padding:8px; border-radius:10px; background:#fbfdff; border:1px solid #eef4fb; }
+    .user-item{ padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:8px; background:white; box-shadow:0 2px 6px rgba(2,6,23,0.03); }
+    .user-item .meta{ font-size:14px; color:#07203a; }
+    .user-actions button{ margin-left:6px; }
+
+    /* ---------- Responsive ---------- */
+    @media (min-width:900px){
+      .layout{ grid-template-columns: 1fr; }
+      .admin-panel-grid{ grid-template-columns: 1fr 420px; }
+    }
+    @media (max-width:520px){
+      .stockActions input{ width:70px; }
+      input[type="text"], input[type="password"]{ font-size:14px; }
+    }
   </style>
 </head>
 <body>
-  <header>📈 InvestoPlay — Dummy Investment Simulator</header>
+  <header>
+    <div class="title">InvestoPlay — Dummy Investment Simulator</div>
+  </header>
 
-  <div id="loginSection">
-    <h2>Login / Signup</h2>
-    <input type="text" id="username" placeholder="Username"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <button onclick="signup()">Signup</button>
-    <button onclick="login()">Login</button>
-    <p id="loginMsg"></p>
-  </div>
+  <div class="container">
 
-  <div id="appSection" style="display:none;">
-    <nav id="stockTabs"></nav>
-    <p id="balance">Balance: ₹10000</p>
-    <div id="stockContainers"></div>
-    <div id="portfolio" class="tab"></div>
-    <div id="adminPanel" class="tab"></div>
+    <!-- LOGIN -->
+    <div id="loginSection" class="card">
+      <h2 style="margin:0 0 12px 0; color:#05264c">Login / Signup</h2>
+      <div class="form-row">
+        <input id="username" type="text" placeholder="Username" />
+      </div>
+      <div class="form-row">
+        <input id="password" type="password" placeholder="Password" />
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+        <button class="btn btn-primary" onclick="signup()">Signup</button>
+        <button class="btn btn-ghost" onclick="login()">Login</button>
+      </div>
+      <p id="loginMsg" class="muted" style="text-align:center; margin-top:10px;"></p>
+      <p class="muted" style="text-align:center; margin-top:8px;">Admin: <strong>admin</strong> / <strong>admin123</strong></p>
+    </div>
+
+    <!-- APP -->
+    <div id="appSection" style="display:none;">
+      <div class="header-row" style="align-items:center;">
+        <div id="balance">Balance: ₹10000</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-ghost" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <nav id="stockTabs" aria-label="Stocks tabs"></nav>
+
+      <div id="stockContainers" class="layout"></div>
+
+      <!-- portfolio tab -->
+      <div id="portfolio" class="tab card"></div>
+
+      <!-- admin tab -->
+      <div id="adminPanel" class="tab card"></div>
+    </div>
+
   </div>
 
 <script>
+/* ========== App State ========== */
 let users = JSON.parse(localStorage.getItem("users")) || {};
-let currentUser = null, balance = 10000, stocks = {}, charts = {};
-const stockList = [
-  "TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave",
-  "HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive",
-  "FashionFi","BuildPro"];
+let currentUser = null;
+let balance = 10000;
+let stocks = {};             // market stocks keyed by name: { price, positions:[], history:[] }
+let charts = {};
+// default market list
+let stockList = ["TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave","HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive","FashionFi","BuildPro"];
 let newsHeadlines = ["launches new product","faces regulations","profits surge","merger rumors","stock buyback announced"];
 
-// Signup
-function signup(){
-  let u=document.getElementById("username").value, p=document.getElementById("password").value;
-  if(!u||!p) return alert("Enter username & password!");
-  if(users[u]) return alert("User exists!");
-  users[u]={password:p,balance:10000,portfolio:{}};
-  localStorage.setItem("users",JSON.stringify(users));
-  alert("Signup successful!");
-}
-
-// Login
-function login(){
-  let u=document.getElementById("username").value, p=document.getElementById("password").value;
-  if(u==="admin" && p==="admin123"){ currentUser="admin"; document.getElementById("loginSection").style.display="none"; document.getElementById("appSection").style.display="block"; loadStocks(); showAdminPanel(); return; }
-  if(users[u] && users[u].password===p){ currentUser=u; balance=users[u].balance; stocks=users[u].portfolio||{}; document.getElementById("loginSection").style.display="none"; document.getElementById("appSection").style.display="block"; loadStocks(); updateBalance(); }
-  else document.getElementById("loginMsg").innerText="Invalid login!";
-}
-
-// Load Stocks UI
-function loadStocks(){
-  let tabs=document.getElementById("stockTabs"), cont=document.getElementById("stockContainers");
-  tabs.innerHTML=""; cont.innerHTML="";
-  let portBtn=document.createElement("button"); portBtn.innerText="📊 Portfolio"; portBtn.onclick=()=>showTab("portfolio"); tabs.appendChild(portBtn);
-  if(currentUser==="admin"){ let adBtn=document.createElement("button"); adBtn.innerText="⚙️ Admin Panel"; adBtn.onclick=()=>showTab("adminPanel"); tabs.appendChild(adBtn); }
-  stockList.forEach(st=>{
-    let btn=document.createElement("button"); btn.innerText=st; btn.onclick=()=>showTab(st); tabs.appendChild(btn);
-    let div=document.createElement("div"); div.id=st; div.className="tab"; 
-    div.innerHTML=`
-      <h2>${st}</h2>
-      <canvas id="chart-${st}"></canvas>
-      <div class="stockInfo" id="info-${st}"></div>
-      <div class="stockActions">
-        <input type="number" id="qty-${st}" min="1" value="1">
-        <button onclick="buyStock('${st}')">Buy</button>
-        <button class="sell" onclick="sellStock('${st}')">Sell</button>
-      </div>
-      <p id="news-${st}"></p>`;
-    cont.appendChild(div);
-    if(!stocks[st]) stocks[st]={price:1000+Math.random()*200,owned:0,history:[],buyPrices:[],purchases:[]};
-    let ctx=div.querySelector(`#chart-${st}`);
-    charts[st]=new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label:st,data:[],borderColor:"#007bff",fill:false}]},options:{scales:{y:{beginAtZero:false}}}});
-  });
-  showTab(stockList[0]);
-  setInterval(updatePrices,5000);
-  setInterval(randomEvents,7000);
-  setInterval(giveDividends,15000);
-}
-
-// Show tab
-function showTab(tab){ document.querySelectorAll(".tab").forEach(t=>t.style.display="none"); document.getElementById(tab).style.display="block"; if(tab==="portfolio") showPortfolio(); if(tab==="adminPanel") showAdminPanel(); else updateStockInfo(tab); }
-
-// Update prices
-function updatePrices(){
-  stockList.forEach(st=>{
-    let ch=(Math.random()-0.5)*100; stocks[st].price=Math.max(100,stocks[st].price+ch); stocks[st].history.push(stocks[st].price.toFixed(2)); if(stocks[st].history.length>20) stocks[st].history.shift();
-    let chart=charts[st]; chart.data.labels=Array(stocks[st].history.length).fill(""); chart.data.datasets[0].data=stocks[st].history; chart.data.datasets[0].borderColor=(ch>=0?"green":"red"); chart.update();
-    updateStockInfo(st);
-  }); saveData();
-}
-
-// Update info
-function updateBalance(){ document.getElementById("balance").innerText=`Balance: ₹${balance.toFixed(2)}`; }
-function updateStockInfo(st){ let s=stocks[st]; let inf=`Current Price: ₹${s.price.toFixed(2)}<br>Owned: ${s.owned}`; if(s.owned>0) inf+=`<br>Buy Prices: ${s.buyPrices.join(", ")}`; document.getElementById(`info-${st}`).innerHTML=inf; document.getElementById(`news-${st}`).innerText=`${st} ${newsHeadlines[Math.floor(Math.random()*newsHeadlines.length)]}`; }
-
-// Buy/Sell with cooldown & per-buy tracking
-function buyStock(st){
-  let qty=parseInt(document.getElementById(`qty-${st}`).value)||1;
-  let s=stocks[st], totalCost=s.price*qty;
-  let now=Date.now();
-  s.purchases=s.purchases.filter(t=>now-t<5*60*1000); // keep only last 5 mins
-  if(s.purchases.length+qty>10) return alert(`${st} can only be bought 10 times in 5 minutes!`);
-  if(balance<totalCost) return alert("Not enough money!");
-  if(confirm(`Buy ${qty} shares of ${st} for ₹${totalCost.toFixed(2)}?`)){
-    balance-=totalCost; s.owned+=qty;
-    for(let i=0;i<qty;i++){ s.buyPrices.push(s.price.toFixed(2)); s.purchases.push(now); }
-    updateBalance(); updateStockInfo(st); saveData();
+/* ---------- Helpers ---------- */
+function saveAll(){
+  if(currentUser && currentUser !== "admin"){
+    users[currentUser].balance = balance;
+    users[currentUser].portfolio = stocks;
   }
+  localStorage.setItem("users", JSON.stringify(users));
+}
+function formatR(n){ return "₹" + parseFloat(n).toFixed(2); }
+
+/* ---------- Auth ---------- */
+function signup(){
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  if(!u||!p){ alert("Enter username & password"); return; }
+  if(users[u]){ alert("User exists"); return; }
+  users[u] = { password: p, balance: 10000, portfolio: {} };
+  localStorage.setItem("users", JSON.stringify(users));
+  alert("Signup successful — now login.");
+}
+function login(){
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  if(u === "admin" && p === "admin123"){
+    currentUser = "admin";
+    showApp();
+    return;
+  }
+  if(!users[u] || users[u].password !== p){
+    document.getElementById("loginMsg").innerText = "Invalid login";
+    return;
+  }
+  currentUser = u;
+  balance = users[u].balance || 10000;
+  // clone portfolio into working stocks so the UI displays it
+  stocks = users[u].portfolio || {};
+  // ensure all market stocks exist in stocks object
+  stockList.forEach(s => {
+    if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
+  });
+  showApp();
+}
+function logout(){
+  currentUser = null;
+  balance = 10000;
+  stocks = {};
+  charts = {};
+  document.getElementById("appSection").style.display = "none";
+  document.getElementById("loginSection").style.display = "block";
+  document.getElementById("loginMsg").innerText = "";
+}
+
+/* ---------- UI boot ---------- */
+function showApp(){
+  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("appSection").style.display = "block";
+  initMarketIfNeeded();
+  buildTabs();
+  updateBalanceUI();
+  loadStocksUI();
+  // timers
+  clearIntervals();
+  window._updatePricesInterval = setInterval(updatePrices, 5000);
+  window._randomEventsInterval = setInterval(randomEvents, 7000);
+  window._dividendsInterval = setInterval(giveDividends, 15000);
+}
+function initMarketIfNeeded(){
+  // if stocks empty, initialize market skeleton from stockList
+  stockList.forEach(s => {
+    if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
+    stocks[s].positions = stocks[s].positions || [];
+    stocks[s].history = stocks[s].history || [];
+    stocks[s].price = stocks[s].price || 1000 + Math.random()*200;
+  });
+}
+
+function clearIntervals(){
+  if(window._updatePricesInterval) clearInterval(window._updatePricesInterval);
+  if(window._randomEventsInterval) clearInterval(window._randomEventsInterval);
+  if(window._dividendsInterval) clearInterval(window._dividendsInterval);
+}
+
+/* ---------- Tabs & Market UI ---------- */
+function buildTabs(){
+  const tabs = document.getElementById("stockTabs");
+  tabs.innerHTML = "";
+  // portfolio tab
+  const portBtn = document.createElement("button");
+  portBtn.innerText = "📊 Portfolio";
+  portBtn.onclick = () => showTab("portfolio");
+  tabs.appendChild(portBtn);
+
+  // admin tab (only for admin)
+  if(currentUser === "admin"){
+    const adminBtn = document.createElement("button");
+    adminBtn.innerText = "⚙️ Admin Panel";
+    adminBtn.onclick = () => showTab("adminPanel");
+    tabs.appendChild(adminBtn);
+  }
+
+  // per-stock tabs
+  stockList.forEach(s => {
+    const b = document.createElement("button");
+    b.innerText = s;
+    b.onclick = () => showTab(s);
+    tabs.appendChild(b);
+  });
+  // mark first as active initially
+  const first = tabs.querySelector("button");
+  if(first) first.classList.add("active");
+}
+
+function showTab(tab){
+  // highlight active
+  document.querySelectorAll("#stockTabs button").forEach(b => b.classList.remove("active"));
+  const btn = Array.from(document.querySelectorAll("#stockTabs button")).find(x=>x.innerText===tab || (tab==="portfolio" && x.innerText.includes("Portfolio")) || (tab==="adminPanel" && x.innerText.includes("Admin")));
+  if(btn) btn.classList.add("active");
+
+  // hide all tabs
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  // show or build
+  if(tab === "portfolio") {
+    buildPortfolioTab();
+    document.getElementById("portfolio").style.display = "block";
+  } else if(tab === "adminPanel") {
+    buildAdminPanel();
+    document.getElementById("adminPanel").style.display = "block";
+  } else {
+    // stock tab
+    const el = document.getElementById(tab);
+    if(!el) {
+      // build if missing
+      buildSingleStockTab(tab);
+    }
+    document.getElementById(tab).style.display = "block";
+  }
+}
+
+/* ---------- Build stock tabs ---------- */
+function loadStocksUI(){
+  const container = document.getElementById("stockContainers");
+  container.innerHTML = "";
+  stockList.forEach(s => buildSingleStockTab(s));
+  // show first stock by default
+  if(stockList[0]) showTab(stockList[0]);
+}
+
+function buildSingleStockTab(stockName){
+  const container = document.getElementById("stockContainers");
+  // remove existing tab element if present
+  let existing = document.getElementById(stockName);
+  if(existing) existing.remove();
+
+  const tab = document.createElement("div");
+  tab.className = "tab card";
+  tab.id = stockName;
+
+  tab.innerHTML = `
+    <div class="stock-head">
+      <div>
+        <h2>${stockName}</h2>
+        <div class="small-note">Market instrument &mdash; simulated</div>
+      </div>
+      <div style="min-width:200px; text-align:right;">
+        <div style="font-weight:700; font-size:16px;" id="price-${stockName}">${formatR(stocks[stockName].price)}</div>
+        <div class="muted small-note" id="last-updated-${stockName}">Live</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <canvas id="chart-${stockName}" style="max-height:220px;"></canvas>
+    </div>
+
+    <div class="stockInfo" id="info-${stockName}"></div>
+
+    <div class="stockActions" style="margin-top:10px;">
+      <input id="qty-${stockName}" type="number" min="1" value="1" />
+      <button class="btn btn-primary" onclick="buyStock('${stockName}')">Buy</button>
+      <button class="btn" style="background:var(--danger); color:white;" onclick="sellStock('${stockName}')">Sell</button>
+      <div style="flex:1"></div>
+      <div class="muted small-note">Tip: positions are listed separately (no averaging).</div>
+    </div>
+  `;
+
+  container.appendChild(tab);
+
+  // initialize chart
+  const ctx = tab.querySelector(`#chart-${stockName}`);
+  const c = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: stockName, data: [], borderColor: '#0b74ff', borderWidth:2, fill:false, pointRadius:0 }] },
+    options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{beginAtZero:false}}}
+  });
+  charts[stockName] = c;
+  // populate initial chart history if any
+  const h = stocks[stockName].history || [];
+  if(h.length){
+    c.data.labels = h.map((_,i)=>i+1);
+    c.data.datasets[0].data = h.map(v=>parseFloat(v));
+    c.update();
+  }
+  updateStockInfo(stockName);
+}
+
+/* ---------- Price updates & events ---------- */
+function updatePrices(){
+  stockList.forEach(s=>{
+    const change = (Math.random()-0.5)*100;
+    stocks[s].price = Math.max(50, stocks[s].price + change);
+    stocks[s].history.push(parseFloat(stocks[s].price.toFixed(2)));
+    if(stocks[s].history.length > 30) stocks[s].history.shift();
+
+    // update chart
+    const chart = charts[s];
+    if(chart){
+      chart.data.labels = stocks[s].history.map((_,i)=>"");
+      chart.data.datasets[0].data = stocks[s].history;
+      chart.data.datasets[0].borderColor = change >= 0 ? '#16a34a' : '#dc2626';
+      chart.update();
+    }
+    // update price and stock info area
+    const priceEl = document.getElementById(`price-${s}`);
+    if(priceEl) priceEl.innerText = formatR(stocks[s].price);
+    updateStockInfo(s);
+  });
+  saveAll();
+}
+
+function randomEvents(){
+  if(Math.random() < 0.22){
+    const st = stockList[Math.floor(Math.random()*stockList.length)];
+    const boom = Math.random() < 0.5;
+    stocks[st].price = Math.max(50, stocks[st].price * (boom ? 1.28 : 0.72));
+    alert(boom ? `🚀 ${st} skyrocketed!` : `⚠️ ${st} had a sharp fall!`);
+    updatePrices(); // immediate apply
+  }
+}
+
+/* ---------- Buy / Sell (positions preserved) ---------- */
+function buyStock(st){
+  const qty = Math.max(1, parseInt(document.getElementById(`qty-${st}`).value || 1));
+  const total = stocks[st].price * qty;
+  if(currentUser === "admin"){ alert("Admin cannot buy. Use admin panel to modify user portfolios."); return; }
+  if(balance < total){ alert("Not enough funds"); return; }
+  if(!confirm(`Buy ${qty} × ${st} for ${formatR(total)}?`)) return;
+  balance -= total;
+  // push position: keep separate buys
+  stocks[st].positions.push({ qty: qty, price: parseFloat(stocks[st].price.toFixed(2)) });
+  updateBalanceUI();
+  updateStockInfo(st);
+  saveAll();
 }
 function sellStock(st){
-  let qty=parseInt(document.getElementById(`qty-${st}`).value)||1; let s=stocks[st];
-  if(s.owned<qty) return alert("You don't own enough shares!");
-  if(confirm(`Sell ${qty} shares of ${st} for ₹${(s.price*qty).toFixed(2)}?`)){
-    balance+=s.price*qty; s.owned-=qty;
-    s.buyPrices.splice(0,qty); // remove oldest buys
-    updateBalance(); updateStockInfo(st); saveData();
+  const qty = Math.max(1, parseInt(document.getElementById(`qty-${st}`).value || 1));
+  if(currentUser === "admin"){ alert("Admin cannot sell. Use admin panel to modify user portfolios."); return; }
+  const totalOwned = (stocks[st].positions || []).reduce((a,p)=>a + (p.qty||0), 0);
+  if(totalOwned < qty){ alert("Not enough shares to sell"); return; }
+  if(!confirm(`Sell ${qty} × ${st} for ${formatR(stocks[st].price * qty)}?`)) return;
+
+  // FIFO: remove from oldest positions first
+  let remaining = qty;
+  for(let i=0;i<stocks[st].positions.length && remaining>0;i++){
+    const pos = stocks[st].positions[i];
+    if(pos.qty <= remaining){
+      remaining -= pos.qty;
+      pos.qty = 0;
+    } else {
+      pos.qty -= remaining;
+      remaining = 0;
+    }
+  }
+  stocks[st].positions = stocks[st].positions.filter(p => p.qty > 0);
+  balance += stocks[st].price * qty;
+  updateBalanceUI();
+  updateStockInfo(st);
+  saveAll();
+}
+
+/* ---------- STOCK INFO UI ---------- */
+function updateStockInfo(st){
+  const s = stocks[st];
+  const infoEl = document.getElementById(`info-${st}`);
+  if(!infoEl) return;
+  const totalOwned = (s.positions || []).reduce((acc,p)=>acc + (p.qty||0), 0);
+  let html = `<strong>Current Price:</strong> ${formatR(s.price)}<br><strong>Owned (total):</strong> ${totalOwned}`;
+  if(totalOwned > 0){
+    html += `<div class="small-note">Positions (separate entries):</div><ul class="positions-list">`;
+    s.positions.forEach((p, idx) => {
+      html += `<li>Qty: ${p.qty} @ ${formatR(parseFloat(p.price))}</li>`;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<div class="small-note">You do not own any shares of this company.</div>`;
+  }
+  infoEl.innerHTML = html;
+}
+
+/* ---------- Portfolio ---------- */
+function buildPortfolioTab(){
+  const port = document.getElementById("portfolio");
+  let html = `<h2>📊 Portfolio</h2>`;
+  html += `<table><thead><tr><th>Stock</th><th>Qty</th><th>Buy Price</th><th>Current</th><th>P/L</th></tr></thead><tbody>`;
+  stockList.forEach(st => {
+    const s = stocks[st];
+    (s.positions || []).forEach(pos => {
+      if(pos.qty > 0){
+        const pl = (s.price - parseFloat(pos.price)) * pos.qty;
+        const cls = pl >= 0 ? 'pl-positive' : 'pl-negative';
+        html += `<tr>
+          <td>${st}</td>
+          <td>${pos.qty}</td>
+          <td>${formatR(parseFloat(pos.price))}</td>
+          <td>${formatR(s.price)}</td>
+          <td class="${cls}">${formatR(pl)}</td>
+        </tr>`;
+      }
+    });
+  });
+  html += `</tbody></table>`;
+  port.innerHTML = html;
+  document.getElementById("portfolio").style.display = "block";
+}
+
+/* ---------- DIVIDENDS (combined alert) ---------- */
+function giveDividends(){
+  if(!currentUser || currentUser === "admin") return;
+  let totalDiv = 0;
+  let breakdown = [];
+  stockList.forEach(stock => {
+    const s = stocks[stock];
+    const owned = (s.positions || []).reduce((a,p)=>a + (p.qty||0),0);
+    if(owned > 0){
+      // dividend per share: min 200 + small company modifier + random
+      const base = 200;
+      const modifier = (stock.length % 5) * 10;
+      const perShare = base + modifier + Math.floor(Math.random()*101); // 200..~400+
+      const compDividend = perShare * owned;
+      totalDiv += compDividend;
+      breakdown.push(`${stock}: ${owned}×₹${perShare} = ₹${compDividend.toFixed(2)}`);
+    }
+  });
+  if(totalDiv > 0){
+    balance += totalDiv;
+    alert(`💸 Total dividends received: ${formatR(totalDiv)}\nBreakdown:\n${breakdown.join("\n")}`);
+    updateBalanceUI();
+    saveAll();
   }
 }
 
-// Portfolio
-function showPortfolio(){ 
-  let port=document.getElementById("portfolio"); 
-  let html="<h2>📊 Your Portfolio</h2><table><tr><th>Stock</th><th>Buy Prices</th><th>Current</th><th>Total P/L</th></tr>"; 
-  stockList.forEach(st=>{ 
-    let s=stocks[st]; 
-    if(s.owned>0){ 
-      let totalPL=0; 
-      s.buyPrices.forEach(bp=>{ totalPL+=s.price-bp; }); 
-      html+=`<tr><td>${st}</td><td>${s.buyPrices.join(", ")}</td><td>₹${s.price.toFixed(2)}</td><td style="color:${totalPL>=0?"green":"red"}">₹${totalPL.toFixed(2)}</td></tr>`; 
-    }
-  }); 
-  html+="</table>"; 
-  port.innerHTML=html; 
+/* ---------- Random events already implemented above ---------- */
+
+/* ---------- Balance UI ---------- */
+function updateBalanceUI(){
+  document.getElementById("balance").innerText = `Balance: ${formatR(balance)}`;
 }
 
-// Admin Panel
-function showAdminPanel(){ let ad=document.getElementById("adminPanel"); let html="<h2>⚙️ Admin Panel</h2><table><tr><th>User</th><th>Balance</th><th>Actions</th></tr>"; for(let u in users){ html+=`<tr><td>${u}</td><td>₹${users[u].balance}</td><td><button onclick="giveMoney('${u}')">+₹1000</button></td></tr>`; } html+="</table>"; ad.innerHTML=html; }
-function giveMoney(u){ users[u].balance+=1000; localStorage.setItem("users",JSON.stringify(users)); alert(`${u} credited ₹1000!`); showAdminPanel(); }
+/* ---------- Save on window unload ---------- */
+window.addEventListener("beforeunload", () => { saveAll(); });
 
-// Events & Dividends
-function randomEvents(){ if(Math.random()<0.3){ let st=stockList[Math.floor(Math.random()*stockList.length)]; let boom=Math.random()<0.5; stocks[st].price*=boom?1.3:0.7; alert(boom?`🚀 ${st} skyrocketed!`:`⚠️ ${st} crashed!`); } }
-// Dividends combined
-function giveDividends(){
-  if(!currentUser||currentUser==="admin")return;
-  let totalDividend=0;
-  stockList.forEach(st=>{
-    let s=stocks[st];
-    if(s.owned>0){ let div=200*s.owned; balance+=div; totalDividend+=div; }
+/* ---------- ADMIN PANEL (powerful tools) ---------- */
+function buildAdminPanel(){
+  const ad = document.getElementById("adminPanel");
+  let html = `<h2>⚙️ Admin Panel</h2><div class="admin-panel-grid">`;
+
+  // left: user list & actions
+  html += `<div class="card user-list">`;
+  html += `<h3 style="margin-top:0">Users</h3>`;
+  for(const u in users){
+    html += `<div class="user-item">
+      <div>
+        <div class="meta"><strong>${u}</strong></div>
+        <div class="muted small-note">Balance: ${formatR(users[u].balance)}</div>
+      </div>
+      <div class="user-actions">
+        <button class="btn btn-ghost" onclick="adminAdjustBalance('${u}')">Adjust Balance</button>
+        <button class="btn btn-primary" onclick="adminEditPortfolio('${u}')">Manage Portfolio</button>
+      </div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // right: market controls
+  html += `<div class="card" style="padding:14px;">
+    <h3 style="margin-top:0">Market Controls</h3>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <input id="newStockName" type="text" placeholder="New stock name" />
+      <input id="newStockPrice" type="number" placeholder="Price" />
+      <button class="btn btn-primary" onclick="adminAddStock()">Add Stock</button>
+    </div>
+    <div style="margin-top:10px;">
+      <h4 style="margin:6px 0;">Existing Stocks</h4>
+      <div id="admin-stock-list" style="max-height:260px; overflow:auto;"></div>
+    </div>
+  </div>`;
+
+  html += `</div>`; // admin-grid
+  ad.innerHTML = html;
+
+  // populate existing stocks list
+  renderAdminStockList();
+  ad.style.display = "block";
+}
+
+function renderAdminStockList(){
+  const el = document.getElementById("admin-stock-list");
+  el.innerHTML = "";
+  stockList.forEach(s => {
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.justifyContent = "space-between";
+    div.style.alignItems = "center";
+    div.style.padding = "8px 6px";
+    div.style.borderBottom = "1px solid #eef4fb";
+    div.innerHTML = `<div style="font-weight:600">${s}</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="muted small-note">${formatR(stocks[s].price)}</div>
+        <button class="btn btn-ghost" onclick="adminAdjustStockPrice('${s}')">Change Price</button>
+        <button class="btn" style="background:${'#ef4444'}; color:white" onclick="adminRemoveStock('${s}')">Remove</button>
+      </div>`;
+    el.appendChild(div);
   });
-  if(totalDividend>0) alert(`💸 You earned ₹${totalDividend.toFixed(2)} in combined dividends!`);
-  updateBalance(); saveData();
 }
 
-// Save
-function saveData(){ if(currentUser!=="admin"){ users[currentUser].balance=balance; users[currentUser].portfolio=stocks; localStorage.setItem("users",JSON.stringify(users)); } }
+function adminAdjustBalance(username){
+  const amtStr = prompt(`Enter amount to ADD (positive) or SUBTRACT (negative) for ${username} (in ₹):`, "1000");
+  if(amtStr === null) return;
+  const amt = parseFloat(amtStr);
+  if(isNaN(amt)){ alert("Invalid amount"); return; }
+  users[username].balance = (users[username].balance || 0) + amt;
+  localStorage.setItem("users", JSON.stringify(users));
+  alert(`Updated ${username} balance to ${formatR(users[username].balance)}`);
+  buildAdminPanel();
+}
+
+function adminEditPortfolio(username){
+  // open a lightweight manage loop: show current positions, allow add/remove
+  const user = users[username];
+  let msg = `Manage portfolio for ${username}\n\nCurrent positions:\n`;
+  const userPortfolio = user.portfolio || {};
+  stockList.forEach(s => {
+    const positions = (userPortfolio[s] && userPortfolio[s].positions) ? userPortfolio[s].positions : [];
+    positions.forEach(p => { if(p.qty > 0) msg += `${s}: ${p.qty} @ ${formatR(p.price)}\n`; });
+  });
+  msg += `\nChoose an action:\n1) Add position\n2) Remove position (by stock name)\nCancel = abort`;
+  const choice = prompt(msg, "1");
+  if(choice === null) return;
+  if(choice.trim() === "1"){
+    const stockName = prompt("Stock name (existing or new):", stockList[0]);
+    if(!stockName) return;
+    const qty = parseInt(prompt("Qty to add:", "1"));
+    const price = parseFloat(prompt("Buy price per share:", "1000"));
+    if(isNaN(qty) || isNaN(price)){ alert("Invalid qty or price"); return; }
+    // ensure user portfolio object
+    user.portfolio = user.portfolio || {};
+    if(!user.portfolio[stockName]) user.portfolio[stockName] = { price: price, positions: [], history: [] };
+    user.portfolio[stockName].positions = user.portfolio[stockName].positions || [];
+    user.portfolio[stockName].positions.push({ qty: qty, price: parseFloat(price) });
+    // if stock not on market, add to market
+    if(!stockList.includes(stockName)){
+      stockList.push(stockName);
+      stocks[stockName] = { price: parseFloat(price), positions: [], history: [] };
+    }
+    users[username] = user;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert(`Added ${qty} x ${stockName} to ${username}`);
+    buildAdminPanel();
+    return;
+  } else if(choice.trim() === "2"){
+    const stockName = prompt("Enter stock name to remove positions from:");
+    if(!stockName) return;
+    if(!user.portfolio || !user.portfolio[stockName]){ alert("User has no positions in that stock"); return; }
+    const remQty = parseInt(prompt("Qty to remove (will remove FIFO):", "1"));
+    if(isNaN(remQty) || remQty <= 0){ alert("Invalid qty"); return; }
+    // perform FIFO removal
+    let remaining = remQty;
+    const pos = user.portfolio[stockName].positions || [];
+    for(let i=0;i<pos.length && remaining>0;i++){
+      if(pos[i].qty <= remaining){ remaining -= pos[i].qty; pos[i].qty = 0; }
+      else { pos[i].qty -= remaining; remaining = 0; }
+    }
+    user.portfolio[stockName].positions = pos.filter(p => p.qty > 0);
+    users[username] = user;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert(`Removed ${remQty - remaining} shares (attempted ${remQty}) from ${username}'s ${stockName}`);
+    buildAdminPanel();
+    return;
+  } else {
+    return;
+  }
+}
+
+function adminAddStock(){
+  const name = document.getElementById("newStockName").value.trim();
+  const price = parseFloat(document.getElementById("newStockPrice").value || "0");
+  if(!name || isNaN(price) || price <= 0){ alert("Enter valid name & price"); return; }
+  if(stockList.includes(name)){ alert("Stock already exists"); return; }
+  stockList.push(name);
+  stocks[name] = { price: parseFloat(price), positions: [], history: [] };
+  renderAdminStockList();
+  loadStocksUI();
+  alert(`Added ${name} at ${formatR(price)}`);
+}
+
+function adminRemoveStock(name){
+  if(!confirm(`Remove ${name} from market? This will not remove users' positions in stored portfolios.`)) return;
+  stockList = stockList.filter(s => s !== name);
+  delete stocks[name];
+  // remove DOM tab if exists
+  const el = document.getElementById(name);
+  if(el) el.remove();
+  renderAdminStockList();
+  loadStocksUI();
+  alert(`${name} removed from market.`);
+}
+
+function adminAdjustStockPrice(name){
+  const amtStr = prompt(`Set new price for ${name} (enter numeric) — or prefix + or - to change relative:`, `${stocks[name].price.toFixed(2)}`);
+  if(amtStr === null) return;
+  let val = amtStr.trim();
+  if(val.startsWith("+") || val.startsWith("-")){
+    const delta = parseFloat(val);
+    if(isNaN(delta)){ alert("Invalid change"); return; }
+    stocks[name].price = Math.max(1, stocks[name].price + delta);
+  } else {
+    const p = parseFloat(val);
+    if(isNaN(p) || p <= 0){ alert("Invalid price"); return; }
+    stocks[name].price = p;
+  }
+  renderAdminStockList();
+  // update UI price elements and charts
+  const priceEl = document.getElementById(`price-${name}`);
+  if(priceEl) priceEl.innerText = formatR(stocks[name].price);
+  updateStockInfo(name);
+  saveAll();
+  alert(`Updated ${name} price to ${formatR(stocks[name].price)}`);
+}
+
+/* ---------- Initialization on page load ---------- */
+window.onload = () => {
+  // ensure there is at least one default admin user in storage for demo
+  if(!users["alice"]) {
+    // optional sample user so admin panel isn't empty
+    users["alice"] = { password: "alice", balance: 10000, portfolio: {} };
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+  // Pre-populate stocks if user portfolio empty and not logged in yet
+  stockList.forEach(s => {
+    if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
+  });
+};
 </script>
 </body>
 </html>
