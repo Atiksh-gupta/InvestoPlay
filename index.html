@@ -133,12 +133,58 @@
       .stockActions input{ width:70px; }
       input[type="text"], input[type="password"]{ font-size:14px; }
     }
+ #welcomePage {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(120deg, #007bff, #00b4d8);
+      color: white;
+      text-align: center;
+      animation: fadeIn 1.5s ease;
+    }
+    #welcomePage h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      animation: slideDown 1.2s ease;
+    }
+    #welcomePage h2 {
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 30px;
+      animation: slideUp 1.2s ease;
+    }
+    #welcomePage button {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 6px;
+      background: #fff;
+      color: #007bff;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #welcomePage button:hover {
+      background: #e2e8f0;
+    }
+
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes slideDown { from {transform:translateY(-40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+    @keyframes slideUp { from {transform:translateY(40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
   </style>
 </head>
 <body>
   <header>
     <div class="title">InvestoPlay — Dummy Investment Simulator</div>
   </header>
+
+  <div id="welcomePage">
+    <h1>Welcome to InvestoPlay</h1>
+    <h2>Powered by WEB BUILDERS</h2>
+    <button onclick="enterSite()">Enter</button>
+  </div>
 
   <div class="container">
 
@@ -156,7 +202,6 @@
         <button class="btn btn-ghost" onclick="login()">Login</button>
       </div>
       <p id="loginMsg" class="muted" style="text-align:center; margin-top:10px;"></p>
-      <p class="muted" style="text-align:center; margin-top:8px;">Admin: <strong>admin</strong> / <strong>admin123</strong></p>
     </div>
 
     <!-- APP -->
@@ -191,6 +236,12 @@ let charts = {};
 // default market list
 let stockList = ["TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave","HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive","FashionFi","BuildPro"];
 let newsHeadlines = ["launches new product","faces regulations","profits surge","merger rumors","stock buyback announced"];
+
+function enterSite(){
+  document.getElementById("welcomePage").style.display="none";
+  document.querySelector("header").style.display="block";
+  document.getElementById("loginSection").style.display="block";
+}
 
 /* ---------- Helpers ---------- */
 function saveAll(){
