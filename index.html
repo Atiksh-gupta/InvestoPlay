@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +29,16 @@
       color:#0f172a;
       -webkit-font-smoothing:antialiased;
     }
+body.dark{ 
+--bg:#0f172a; 
+--card:#1e293b; 
+--muted:#94a3b8; 
+--primary:#38bdf8; 
+--accent:#22d3ee; 
+--success:#4ade80; 
+--danger:#f87171; 
+background:var(--bg); color:white;
+}
     header{
       background: linear-gradient(90deg,var(--primary), var(--accent));
       color: white;
@@ -209,7 +220,8 @@
       <div class="header-row" style="align-items:center;">
         <div id="balance">Balance: ₹10000</div>
         <div style="display:flex; gap:10px;">
-          <button class="btn btn-ghost" onclick="logout()">Logout</button>
+        <button class="btn btn-ghost" onclick="toggleTheme()">🌓</button>
+        <button class="btn btn-ghost" onclick="logout()">Logout</button>
         </div>
       </div>
 
@@ -219,12 +231,33 @@
 
       <!-- portfolio tab -->
       <div id="portfolio" class="tab card"></div>
+      <h2>Portfolio Overview</h2>
+      <table id="portfolioTable">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Qty</th>
+            <th>Avg Price</th>
+            <th>Current</th>
+            <th>P/L</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small-note">Your profits/losses are updated in real-time based on stock prices.</p>
+    </div>
 
       <!-- admin tab -->
       <div id="adminPanel" class="tab card"></div>
-    </div>
 
+    <!-- Chart Tab -->
+    <div id="charts" class="tab card">
+      <h2>Stock Charts</h2>
+      <canvas id="stockChart" width="400" height="200"></canvas>
+    </div>
   </div>
+</div>
+
 
 <script>
 /* ========== App State ========== */
@@ -236,6 +269,7 @@ let charts = {};
 // default market list
 let stockList = ["TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave","HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive","FashionFi","BuildPro"];
 let newsHeadlines = ["launches new product","faces regulations","profits surge","merger rumors","stock buyback announced"];
+let darkMode = false;
 
 function enterSite(){
   document.getElementById("welcomePage").style.display="none";
@@ -293,6 +327,70 @@ function logout(){
   document.getElementById("appSection").style.display = "none";
   document.getElementById("loginSection").style.display = "block";
   document.getElementById("loginMsg").innerText = "";
+}
+
+
+function updatePortfolio(){
+  const tbody = document.querySelector('#portfolioTable tbody');
+  tbody.innerHTML='';
+  for(const key in portfolio){
+    const s = stocks.find(st=>st.name===key);
+    const pl = (s.price-portfolio[key].avg)*portfolio[key].qty;
+    const row = `<tr>
+      <td>${key}</td>
+      <td>${portfolio[key].qty}</td>
+      <td>₹${portfolio[key].avg.toFixed(2)}</td>
+      <td>₹${s.price.toFixed(2)}</td>
+      <td class="${pl>=0?'pl-positive':'pl-negative'}">₹${pl.toFixed(2)}</td>
+    </tr>`;
+    tbody.innerHTML+=row;
+  }
+}
+
+// ======== CHART ========
+const ctx = document.getElementById('stockChart').getContext('2d');
+const chart = new Chart(ctx,{
+  type:'line',
+  data:{ labels:[], datasets:[] },
+  options:{ responsive:true, plugins:{ legend:{display:true} } }
+});
+function updateChart(){
+  chart.data.labels = stocks.map(s=>s.name);
+  chart.data.datasets = [{ label:'Current Price', data:stocks.map(s=>s.price), borderColor:'#007bff', backgroundColor:'rgba(0,123,255,0.2)' }];
+  chart.update();
+}
+
+// ======== THEME ========
+function toggleTheme(){ 
+  darkMode=!darkMode; 
+  document.body.classList.toggle('dark', darkMode); 
+}
+
+window.onload = () => {
+  darkMode = localStorage.getItem('darkMode') === 'true';
+  document.body.classList.toggle('dark', darkMode);
+};
+function toggleTheme(){ 
+  darkMode = !darkMode; 
+  document.body.classList.toggle('dark', darkMode); 
+  localStorage.setItem('darkMode', darkMode);
+}
+
+function createStockContainer(stock){
+  const container = document.getElementById('stockContainers');
+  const div = document.createElement('div');
+  div.id = stock.name;
+  div.className='tab card';
+  div.innerHTML = `
+    <div class="stock-head"><h2>${stock.name}</h2><span>₹${stock.price}</span></div>
+    <div class="stockActions">
+      <input type="number" id="buyQty_${stock.name}" placeholder="Qty">
+      <button class="btn btn-primary" onclick="buyStock('${stock.name}')">Buy</button>
+      <input type="number" id="sellQty_${stock.name}" placeholder="Qty">
+      <button class="btn btn-danger" onclick="sellStock('${stock.name}')">Sell</button>
+    </div>
+  `;
+  container.appendChild(div);
 }
 
 /* ---------- UI boot ---------- */
