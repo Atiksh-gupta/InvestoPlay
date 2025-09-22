@@ -184,6 +184,72 @@ background:var(--bg); color:white;
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
     @keyframes slideDown { from {transform:translateY(-40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
     @keyframes slideUp { from {transform:translateY(40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+
+ #helpTab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 30px 0 0 30px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: -3px 3px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  #helpTab:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: -5px 5px 18px rgba(0,0,0,0.5);
+  }
+
+  /* Help Panel */
+  #helpPanel {
+    position: fixed;
+    right: -350px;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -3px 0 12px rgba(0,0,0,0.3);
+    border-left: 4px solid #ff416c;
+    transition: right 0.4s ease;
+    padding: 20px;
+    z-index: 999;
+    overflow-y: auto;
+  }
+
+  #helpPanel h2 {
+    margin-top: 0;
+    color: #ff416c;
+    font-size: 22px;
+  }
+
+  #helpPanel ul {
+    padding-left: 20px;
+  }
+
+  #helpPanel button {
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+    width: 100%;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  #helpPanel button:hover {
+    background: linear-gradient(45deg, #ff4b2b, #ff416c);
+    transform: scale(1.05);
+  }
   </style>
 </head>
 <body>
@@ -229,22 +295,11 @@ background:var(--bg); color:white;
 
       <div id="stockContainers" class="layout"></div>
 
+
       <!-- portfolio tab -->
       <div id="portfolio" class="tab card"></div>
-      <h2>Portfolio Overview</h2>
-      <table id="portfolioTable">
-        <thead>
-          <tr>
-            <th>Stock</th>
-            <th>Qty</th>
-            <th>Avg Price</th>
-            <th>Current</th>
-            <th>P/L</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <p class="small-note">Your profits/losses are updated in real-time based on stock prices.</p>
+
+
     </div>
 
       <!-- admin tab -->
@@ -256,6 +311,24 @@ background:var(--bg); color:white;
       <canvas id="stockChart" width="400" height="200"></canvas>
     </div>
   </div>
+</div>
+
+<div id="helpTab" onclick="toggleHelp()">Help ✨</div>
+
+<div id="helpPanel">
+  <h2>Need Help?</h2>
+  <p>Here’s a quick guide to get you started:</p>
+  <ul>
+    <li>Login to your account with your username and password.</li>
+    <li>Update your profile and preferences in settings.</li>
+    <li>Access your dashboard to check stats and updates.</li>
+  </ul>
+  <p>FAQs:</p>
+  <ul>
+    <li><strong>Reset password:</strong> Click 'Forgot Password' at login.</li>
+    <li><strong>Contact support:</strong> Email <strong>support@website.com</strong>.</li>
+  </ul>
+  <button onclick="toggleHelp()">Close Help</button>
 </div>
 
 
@@ -270,6 +343,19 @@ let charts = {};
 let stockList = ["TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave","HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive","FashionFi","BuildPro"];
 let newsHeadlines = ["launches new product","faces regulations","profits surge","merger rumors","stock buyback announced"];
 let darkMode = false;
+let portfolio = JSON.parse(localStorage.getItem('portfolio')) || {};
+let totalProfit = 0;
+let labels = [];
+let data = [];
+
+for (let stock in portfolio) {
+  let item = portfolio[stock];
+  let profit = (item.currentPrice - item.buyPrice) * item.quantity;
+  labels.push(stock);
+  data.push(profit);
+  totalProfit += profit;
+}
+
 
 function enterSite(){
   document.getElementById("welcomePage").style.display="none";
@@ -329,6 +415,107 @@ function logout(){
   document.getElementById("loginMsg").innerText = "";
 }
 
+
+
+function loadPortfolioOverview() {
+  const portfolio = JSON.parse(localStorage.getItem('portfolio'));
+  if (!portfolio || Object.keys(portfolio).length === 0) {
+    document.getElementById('totalPL').innerText = "Portfolio is empty.";
+    return;
+  }
+
+  let chartData = [];
+  let totalPL = 0;
+
+  for (const stock in portfolio) {
+    const { buyPrice, currentPrice, quantity } = portfolio[stock];
+    const pl = (currentPrice - buyPrice) * quantity;
+    totalPL += pl;
+    chartData.push({ name: stock, profitLoss: pl });
+  }
+
+  // Show total P/L
+  document.getElementById('totalPL').innerText = 
+      `Total Portfolio ${totalPL >= 0 ? 'Profit' : 'Loss'}: ₹${totalPL.toFixed(2)}`;
+
+  // Draw chart
+  new Chart(document.getElementById('portfolioChart'), {
+    type: 'bar',
+    data: {
+      labels: chartData.map(s => s.name),
+      datasets: [{
+        label: 'Profit / Loss (₹)',
+        data: chartData.map(s => s.profitLoss),
+        backgroundColor: chartData.map(s => s.profitLoss >= 0 ? 'green' : 'red')
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+const backgroundColors = data.map(p => p >= 0 ? 'green' : 'red');
+
+new Chart(document.getElementById("portfolioChart"), {
+  type: 'bar',
+  data: { labels, datasets: [{ label: "Profit/Loss", data, backgroundColor: backgroundColors }] },
+  options: { scales: { y: { beginAtZero: true } } }
+});
+
+document.getElementById("totalProfit").innerText = `Total Portfolio Profit: ₹${totalProfit.toFixed(2)}`;
+// Run the overview
+loadPortfolioOverview();
+
+function toggleHelp() {
+  const panel = document.getElementById('helpPanel');
+  if(panel.style.right === '0px') {
+    panel.style.right = '-350px';
+  } else {
+    panel.style.right = '0px';
+  }
+}
+
+function loadPortfolioOverview() {
+  if(!currentUser || !stocks) return;
+
+  let chartData = [];
+  let totalPL = 0;
+
+  for (const stock in stocks) {
+    const s = stocks[stock];
+    const totalQty = (s.positions || []).reduce((a,p)=>a+p.qty,0);
+    if(totalQty === 0) continue;
+    const avgPrice = (s.positions || []).reduce((sum,p)=>sum + p.qty*p.price,0)/totalQty;
+    const pl = (s.price - avgPrice) * totalQty;
+    chartData.push({ name: stock, profitLoss: pl });
+    totalPL += pl;
+  }
+
+  if(chartData.length === 0){
+    document.getElementById('totalPL').innerText = "Portfolio is empty.";
+    return;
+  }
+
+  // update total
+  document.getElementById('totalPL').innerText = 
+      `Total Portfolio ${totalPL >= 0 ? 'Profit' : 'Loss'}: ₹${totalPL.toFixed(2)}`;
+
+  const ctx = document.getElementById('portfolioChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: chartData.map(s => s.name),
+      datasets: [{
+        label: 'Profit / Loss (₹)',
+        data: chartData.map(s => s.profitLoss),
+        backgroundColor: chartData.map(s => s.profitLoss >= 0 ? 'green' : 'red')
+      }]
+    },
+    options: { plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true } } }
+  });
+}
 
 function updatePortfolio(){
   const tbody = document.querySelector('#portfolioTable tbody');
