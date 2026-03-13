@@ -5,8 +5,6 @@
   <title>InvestoPlay — Dummy Investment Simulator</title>
   <meta name="google-site-verification" content="kXq3xZ15dk9KxWRYhq9K42qCvrN8P5Eyv5dZoCop-tI" />
   <meta name="description" content="InvestoPlay is a fun dummy investment simulator where you can practice trading stocks and crypto without real money. Created by WEB BUILDERS.">
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
@@ -254,6 +252,10 @@ background:var(--bg); color:white;
     transform: scale(1.05);
   }
   </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
   <header>
@@ -346,6 +348,7 @@ let totalProfit = 0;
 let labels = [];
 let data = [];
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyBWm0WQtDqj9k_EgYQl0ZlIJPeClPFB8vw",
   authDomain: "investoplay-atiksh.firebaseapp.com",
@@ -354,16 +357,15 @@ const firebaseConfig = {
   storageBucket: "investoplay-atiksh.firebasestorage.app",
   messagingSenderId: "358623130102",
   appId: "1:358623130102:web:bafd8653ab330fa2f397d7"
-};
+  };
 
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+  try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase initialized successfully!");
+  } catch (error) {
+      console.error("Firebase failed to start:", error);
+  }
 
-// Test: Save a "Hello" message to your database
-database.ref('test_connection').set({
-    message: "InvestoPlay is Online!",
-    timestamp: Date.now()
-});
 
 for (let stock in portfolio) {
   let item = portfolio[stock];
