@@ -252,7 +252,6 @@ background:var(--bg); color:white;
     transform: scale(1.05);
   }
   </style>
-
 </head>
 <body>
   <header>
@@ -344,6 +343,7 @@ let portfolio = JSON.parse(localStorage.getItem('portfolio')) || {};
 let totalProfit = 0;
 let labels = [];
 let data = [];
+
 
 for (let stock in portfolio) {
   let item = portfolio[stock];
@@ -1078,4 +1078,3 @@ window.onload = () => {
 </script>
 </body>
 </html>
-
