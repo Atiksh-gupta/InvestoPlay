@@ -253,9 +253,6 @@ background:var(--bg); color:white;
   }
   </style>
 
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-
 </head>
 <body>
   <header>
@@ -347,25 +344,6 @@ let portfolio = JSON.parse(localStorage.getItem('portfolio')) || {};
 let totalProfit = 0;
 let labels = [];
 let data = [];
-
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBWm0WQtDqj9k_EgYQl0ZlIJPeClPFB8vw",
-  authDomain: "investoplay-atiksh.firebaseapp.com",
-  database url:https://console.firebase.google.com/project/investoplay-atiksh/database/investoplay-atiksh-default-rtdb/data/~2F
-  projectId: "investoplay-atiksh",
-  storageBucket: "investoplay-atiksh.firebasestorage.app",
-  messagingSenderId: "358623130102",
-  appId: "1:358623130102:web:bafd8653ab330fa2f397d7"
-  };
-
-  try {
-      firebase.initializeApp(firebaseConfig);
-      console.log("Firebase initialized successfully!");
-  } catch (error) {
-      console.error("Firebase failed to start:", error);
-  }
-
 
 for (let stock in portfolio) {
   let item = portfolio[stock];
@@ -1100,3 +1078,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
