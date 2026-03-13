@@ -30,16 +30,34 @@
       color:#0f172a;
       -webkit-font-smoothing:antialiased;
     }
-body.dark{ 
---bg:#0f172a; 
---card:#1e293b; 
---muted:#94a3b8; 
---primary:#38bdf8; 
---accent:#22d3ee; 
---success:#4ade80; 
---danger:#f87171; 
-background:var(--bg); color:white;
-}
+    body.dark{ 
+      --bg:#0f172a; 
+      --card:#1e293b; 
+      --muted:#94a3b8; 
+      --primary:#38bdf8; 
+      --accent:#22d3ee; 
+      --success:#4ade80; 
+      --danger:#f87171; 
+      background:var(--bg); color:white;
+    }
+
+    /* ---------- Toast Notifications ---------- */
+    .toast {
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(8px);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        min-width: 250px;
+        animation: slideIn 0.4s ease forwards;
+        z-index: 10001;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
     header{
       background: linear-gradient(90deg,var(--primary), var(--accent));
       color: white;
@@ -53,75 +71,38 @@ background:var(--bg); color:white;
     header .title{ font-size:20px; font-weight:700; letter-spacing:0.6px; }
     .container{ max-width:var(--maxw); margin:28px auto; padding:0 18px; }
 
-    /* ---------- Login Card ---------- */
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:20px;
-    }
+    /* ---------- UI Elements ---------- */
+    .card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; }
     #loginSection{ max-width:420px; margin:52px auto; }
     .form-row{ margin:12px 0; }
     input[type="text"], input[type="password"], input[type="number"]{
-      width:100%;
-      padding:12px 14px;
-      border-radius:8px;
-      border:1px solid #e6edf3;
-      background:#fbfdff;
-      font-size:15px;
+      width:100%; padding:12px 14px; border-radius:8px; border:1px solid #e6edf3; background:#fbfdff; font-size:15px;
     }
-    button.btn{
-      display:inline-block;
-      padding:10px 14px;
-      border-radius:10px;
-      border:0;
-      cursor:pointer;
-      font-weight:600;
-    }
+    button.btn{ display:inline-block; padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:600; transition:all 0.2s; }
+    button.btn:active{ transform:scale(0.96); }
     .btn-primary{ background:var(--primary); color:white; }
     .btn-ghost{ background:transparent; border:1px solid #dbeafe; color:var(--primary); }
+    .btn-danger{ background:var(--danger); color:white; }
     .muted{ color:var(--muted); font-size:14px; }
 
-    /* ---------- App layout ---------- */
     #appSection{ display:none; }
     nav#stockTabs{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:18px; }
     nav#stockTabs button{ padding:10px 14px; border-radius:10px; border:0; cursor:pointer; background:#eef7ff; color:var(--primary); font-weight:600; box-shadow: 0 2px 6px rgba(3,102,214,0.06); }
     nav#stockTabs button.active{ background:linear-gradient(90deg,var(--primary),var(--accent)); color:white; box-shadow: 0 8px 26px rgba(3,102,214,0.14); transform:translateY(-2px); }
 
-    .layout{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:18px;
-      max-width:var(--maxw);
-      margin:0 auto;
-    }
+    .layout{ display:grid; grid-template-columns: 1fr; gap:18px; max-width:var(--maxw); margin:0 auto; }
+    .header-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+    #balance{ font-size:18px; font-weight:700; color:#0f172a; background:linear-gradient(90deg,#ffffff, #f8fbff); padding:10px 14px; border-radius:10px; box-shadow: 0 4px 10px rgba(2,6,23,0.04); }
 
-    .header-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:6px;
-    }
-    #balance{
-      font-size:18px; font-weight:700; color:#0f172a;
-      background:linear-gradient(90deg,#ffffff, #f8fbff);
-      padding:10px 14px; border-radius:10px;
-      box-shadow: 0 4px 10px rgba(2,6,23,0.04);
-    }
-
-    /* ---------- Tab card ---------- */
     .tab{ display:none; padding:18px; border-radius:12px; background:var(--card); box-shadow:var(--shadow); }
     .stock-head{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
     .stock-head h2{ margin:0; color:var(--primary); font-size:18px; }
     .stockInfo{ margin-top:12px; padding:12px; border-radius:10px; background:#f6fbff; border:1px solid #e6f0ff; color:#05264c; }
     .positions-list{ margin:8px 0 0 0; padding-left:16px; color: #062a45; }
     .small-note{ font-size:13px; color:var(--muted); margin-top:8px; }
-
     .stockActions{ display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap; }
     .stockActions input{ width:92px; }
 
-    /* ---------- Portfolio table ---------- */
     table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
     table th, table td{ text-align:left; padding:10px; border-bottom:1px solid #eef2f7; }
     table th{ color:var(--muted); font-weight:600; background:#fbfdff; border-bottom: 2px solid #eef2f7; }
@@ -136,250 +117,118 @@ background:var(--bg); color:white;
     .user-item .meta{ font-size:14px; color:#07203a; }
     .user-actions button{ margin-left:6px; }
 
-    /* ---------- Responsive ---------- */
-    @media (min-width:900px){
-      .layout{ grid-template-columns: 1fr; }
-      .admin-panel-grid{ grid-template-columns: 1fr 420px; }
-    }
-    @media (max-width:520px){
-      .stockActions input{ width:70px; }
-      input[type="text"], input[type="password"]{ font-size:14px; }
-    }
- #welcomePage {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(120deg, #007bff, #00b4d8);
-      color: white;
-      text-align: center;
-      animation: fadeIn 1.5s ease;
-    }
-    #welcomePage h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      animation: slideDown 1.2s ease;
-    }
-    #welcomePage h2 {
-      font-size: 24px;
-      font-weight: 400;
-      margin-bottom: 30px;
-      animation: slideUp 1.2s ease;
-    }
-    #welcomePage button {
-      padding: 12px 28px;
-      border: none;
-      border-radius: 6px;
-      background: #fff;
-      color: #007bff;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    #welcomePage button:hover {
-      background: #e2e8f0;
-    }
+    /* ---------- Welcome Page ---------- */
+    #welcomePage { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(120deg, #007bff, #00b4d8); color: white; text-align: center; }
+    #welcomePage h1 { font-size: 48px; margin-bottom: 20px; }
+    #welcomePage button { padding: 12px 28px; border: none; border-radius: 6px; background: #fff; color: #007bff; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {transform:translateY(-40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
-    @keyframes slideUp { from {transform:translateY(40px);opacity:0;} to {transform:translateY(0);opacity:1;} }
-
- #helpTab {
-    position: fixed;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(45deg, #ff416c, #ff4b2b);
-    color: white;
-    padding: 16px 24px;
-    border-radius: 30px 0 0 30px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: -3px 3px 12px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
-
-  #helpTab:hover {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: -5px 5px 18px rgba(0,0,0,0.5);
-  }
-
-  /* Help Panel */
-  #helpPanel {
-    position: fixed;
-    right: -350px;
-    top: 0;
-    width: 320px;
-    height: 100%;
-    background: #fff;
-    box-shadow: -3px 0 12px rgba(0,0,0,0.3);
-    border-left: 4px solid #ff416c;
-    transition: right 0.4s ease;
-    padding: 20px;
-    z-index: 999;
-    overflow-y: auto;
-  }
-
-  #helpPanel h2 {
-    margin-top: 0;
-    color: #ff416c;
-    font-size: 22px;
-  }
-
-  #helpPanel ul {
-    padding-left: 20px;
-  }
-
-  #helpPanel button {
-    background: linear-gradient(45deg, #ff416c, #ff4b2b);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 15px;
-    width: 100%;
-    transition: background 0.3s, transform 0.2s;
-  }
-
-  #helpPanel button:hover {
-    background: linear-gradient(45deg, #ff4b2b, #ff416c);
-    transform: scale(1.05);
-  }
+    #helpTab { position: fixed; right: 0; top: 50%; transform: translateY(-50%); background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; padding: 16px 24px; border-radius: 30px 0 0 30px; cursor: pointer; z-index: 1000; font-weight:700; }
+    #helpPanel { position: fixed; right: -350px; top: 0; width: 320px; height: 100%; background: #fff; border-left: 4px solid #ff416c; transition: right 0.4s ease; padding: 20px; z-index: 999; overflow-y: auto; color: #333; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title">InvestoPlay — Dummy Investment Simulator</div>
-  </header>
 
-  <div id="welcomePage">
-    <h1>Welcome to InvestoPlay</h1>
-    <h2>Powered by WEB BUILDERS</h2>
-    <button onclick="enterSite()">Enter</button>
+<div id="welcomePage">
+  <h1>Welcome to InvestoPlay</h1>
+  <h2>Powered by WEB BUILDERS</h2>
+  <button onclick="enterSite()">Enter Site</button>
+</div>
+
+<header>
+  <div class="title">InvestoPlay — Dummy Investment Simulator</div>
+</header>
+
+<div class="container">
+  <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+  <div id="loginSection" class="card">
+    <h2 style="margin:0 0 12px 0; color:#05264c">Login / Signup</h2>
+    <div class="form-row"><input id="username" type="text" placeholder="Username" /></div>
+    <div class="form-row"><input id="password" type="password" placeholder="Password" /></div>
+    <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+      <button class="btn btn-primary" onclick="signup()">Signup</button>
+      <button class="btn btn-ghost" onclick="login()">Login</button>
+    </div>
+    <p id="loginMsg" class="muted" style="text-align:center; margin-top:10px;"></p>
   </div>
 
-  <div class="container">
-
-    <!-- LOGIN -->
-    <div id="loginSection" class="card">
-      <h2 style="margin:0 0 12px 0; color:#05264c">Login / Signup</h2>
-      <div class="form-row">
-        <input id="username" type="text" placeholder="Username" />
-      </div>
-      <div class="form-row">
-        <input id="password" type="password" placeholder="Password" />
-      </div>
-      <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
-        <button class="btn btn-primary" onclick="signup()">Signup</button>
-        <button class="btn btn-ghost" onclick="login()">Login</button>
-      </div>
-      <p id="loginMsg" class="muted" style="text-align:center; margin-top:10px;"></p>
-    </div>
-
-    <!-- APP -->
-    <div id="appSection" style="display:none;">
-      <div class="header-row" style="align-items:center;">
-        <div id="balance">Balance: ₹10000</div>
-        <div style="display:flex; gap:10px;">
+  <div id="appSection">
+    <div class="header-row">
+      <div id="balance">Balance: ₹10000</div>
+      <div style="display:flex; gap:10px;">
         <button class="btn btn-ghost" onclick="toggleTheme()">🌓</button>
         <button class="btn btn-ghost" onclick="logout()">Logout</button>
-        </div>
       </div>
-
-      <nav id="stockTabs" aria-label="Stocks tabs"></nav>
-
-      <div id="stockContainers" class="layout"></div>
-
-
-      <!-- portfolio tab -->
-      <div id="portfolio" class="tab card"></div>
-
-
     </div>
-
-      <!-- admin tab -->
-      <div id="adminPanel" class="tab card"></div>
-
-    <!-- Chart Tab -->
-    <div id="charts" class="tab card">
-      <h2>Stock Charts</h2>
-      <canvas id="stockChart" width="400" height="200"></canvas>
-    </div>
+    <nav id="stockTabs"></nav>
+    <div id="stockContainers" class="layout"></div>
+    <div id="portfolio" class="tab card"></div>
+    <div id="income" class="tab card"></div>
+    <div id="adminPanel" class="tab card"></div>
   </div>
 </div>
 
 <div id="helpTab" onclick="toggleHelp()">Help ✨</div>
-
 <div id="helpPanel">
-  <h2>Need Help?</h2>
-  <p>Here’s a quick guide to get you started:</p>
+  <h2>InvestoPlay Guide</h2>
   <ul>
-    <li>Login to your account with your username and password.</li>
-    <li>Update your profile and preferences in settings.</li>
-    <li>Access your dashboard to check stats and updates.</li>
+    <li><strong>Signup:</strong> Create a unique username.</li>
+    <li><strong>Prices:</strong> Update every 5 seconds.</li>
+    <li><strong>Dividends:</strong> Earn passive cash every 15 seconds.</li>
   </ul>
-  <button onclick="toggleHelp()">Close Help</button>
+  <button class="btn btn-danger" onclick="toggleHelp()">Close</button>
 </div>
-
 
 <script>
 /* ========== App State ========== */
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let currentUser = null;
 let balance = 10000;
-let stocks = {};             // market stocks keyed by name: { price, positions:[], history:[] }
+let stocks = {};
 let charts = {};
-// default market list
 let stockList = ["TechNova","GreenEnergy","FoodiesHub","AeroMax","CryptoWave","HealthFirst","EduGrow","GameX","RoboWorks","AutoDrive","FashionFi","BuildPro"];
-let newsHeadlines = ["launches new product","faces regulations","profits surge","merger rumors","stock buyback announced"];
 let darkMode = false;
-let portfolio = JSON.parse(localStorage.getItem('portfolio')) || {};
-let totalProfit = 0;
-let labels = [];
-let data = [];
+let incomeHistory = [];
 
-
-for (let stock in portfolio) {
-  let item = portfolio[stock];
-  let profit = (item.currentPrice - item.buyPrice) * item.quantity;
-  labels.push(stock);
-  data.push(profit);
-  totalProfit += profit;
+/* ---------- Notification Logic ---------- */
+function showNotification(message) {
+    const container = document.getElementById('notification-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = "fadeOut 0.5s ease forwards";
+        setTimeout(() => { toast.remove(); }, 500);
+    }, 3500);
 }
-
 
 function enterSite(){
   document.getElementById("welcomePage").style.display="none";
-  document.querySelector("header").style.display="block";
-  document.getElementById("loginSection").style.display="block";
 }
 
-/* ---------- Helpers ---------- */
 function saveAll(){
   if(currentUser && currentUser !== "admin"){
     users[currentUser].balance = balance;
     users[currentUser].portfolio = stocks;
+    users[currentUser].incomeHistory = incomeHistory;
   }
   localStorage.setItem("users", JSON.stringify(users));
 }
+
 function formatR(n){ return "₹" + parseFloat(n).toFixed(2); }
 
 /* ---------- Auth ---------- */
 function signup(){
   const u = document.getElementById("username").value.trim();
   const p = document.getElementById("password").value.trim();
-  if(!u||!p){ alert("Enter username & password"); return; }
-  if(users[u]){ alert("User exists"); return; }
-  users[u] = { password: p, balance: 10000, portfolio: {} };
+  if(!u||!p){ showNotification("Please enter username and password."); return; }
+  if(users[u]){ showNotification("Username already exists!"); return; }
+  users[u] = { password: p, balance: 10000, portfolio: {}, incomeHistory: [] };
   localStorage.setItem("users", JSON.stringify(users));
-  alert("Signup successful — now login.");
+  showNotification("Signup successful!");
 }
+
 function login(){
   const u = document.getElementById("username").value.trim();
   const p = document.getElementById("password").value.trim();
@@ -389,195 +238,23 @@ function login(){
     return;
   }
   if(!users[u] || users[u].password !== p){
-    document.getElementById("loginMsg").innerText = "Invalid login";
+    document.getElementById("loginMsg").innerText = "Invalid credentials";
     return;
   }
   currentUser = u;
   balance = users[u].balance || 10000;
-  // clone portfolio into working stocks so the UI displays it
   stocks = users[u].portfolio || {};
-  // ensure all market stocks exist in stocks object
-  stockList.forEach(s => {
-    if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
-  });
+  incomeHistory = users[u].incomeHistory || [];
   showApp();
 }
+
 function logout(){
   currentUser = null;
-  balance = 10000;
-  stocks = {};
-  charts = {};
   document.getElementById("appSection").style.display = "none";
   document.getElementById("loginSection").style.display = "block";
-  document.getElementById("loginMsg").innerText = "";
 }
 
-
-
-function loadPortfolioOverview() {
-  const portfolio = JSON.parse(localStorage.getItem('portfolio'));
-  if (!portfolio || Object.keys(portfolio).length === 0) {
-    document.getElementById('totalPL').innerText = "Portfolio is empty.";
-    return;
-  }
-
-  let chartData = [];
-  let totalPL = 0;
-
-  for (const stock in portfolio) {
-    const { buyPrice, currentPrice, quantity } = portfolio[stock];
-    const pl = (currentPrice - buyPrice) * quantity;
-    totalPL += pl;
-    chartData.push({ name: stock, profitLoss: pl });
-  }
-
-  // Show total P/L
-  document.getElementById('totalPL').innerText = 
-      `Total Portfolio ${totalPL >= 0 ? 'Profit' : 'Loss'}: ₹${totalPL.toFixed(2)}`;
-
-  // Draw chart
-  new Chart(document.getElementById('portfolioChart'), {
-    type: 'bar',
-    data: {
-      labels: chartData.map(s => s.name),
-      datasets: [{
-        label: 'Profit / Loss (₹)',
-        data: chartData.map(s => s.profitLoss),
-        backgroundColor: chartData.map(s => s.profitLoss >= 0 ? 'green' : 'red')
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-}
-
-const backgroundColors = data.map(p => p >= 0 ? 'green' : 'red');
-
-new Chart(document.getElementById("portfolioChart"), {
-  type: 'bar',
-  data: { labels, datasets: [{ label: "Profit/Loss", data, backgroundColor: backgroundColors }] },
-  options: { scales: { y: { beginAtZero: true } } }
-});
-
-document.getElementById("totalProfit").innerText = `Total Portfolio Profit: ₹${totalProfit.toFixed(2)}`;
-// Run the overview
-loadPortfolioOverview();
-
-function toggleHelp() {
-  const panel = document.getElementById('helpPanel');
-  if(panel.style.right === '0px') {
-    panel.style.right = '-350px';
-  } else {
-    panel.style.right = '0px';
-  }
-}
-
-function loadPortfolioOverview() {
-  if(!currentUser || !stocks) return;
-
-  let chartData = [];
-  let totalPL = 0;
-
-  for (const stock in stocks) {
-    const s = stocks[stock];
-    const totalQty = (s.positions || []).reduce((a,p)=>a+p.qty,0);
-    if(totalQty === 0) continue;
-    const avgPrice = (s.positions || []).reduce((sum,p)=>sum + p.qty*p.price,0)/totalQty;
-    const pl = (s.price - avgPrice) * totalQty;
-    chartData.push({ name: stock, profitLoss: pl });
-    totalPL += pl;
-  }
-
-  if(chartData.length === 0){
-    document.getElementById('totalPL').innerText = "Portfolio is empty.";
-    return;
-  }
-
-  // update total
-  document.getElementById('totalPL').innerText = 
-      `Total Portfolio ${totalPL >= 0 ? 'Profit' : 'Loss'}: ₹${totalPL.toFixed(2)}`;
-
-  const ctx = document.getElementById('portfolioChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: chartData.map(s => s.name),
-      datasets: [{
-        label: 'Profit / Loss (₹)',
-        data: chartData.map(s => s.profitLoss),
-        backgroundColor: chartData.map(s => s.profitLoss >= 0 ? 'green' : 'red')
-      }]
-    },
-    options: { plugins:{legend:{display:false}}, scales:{ y:{ beginAtZero:true } } }
-  });
-}
-
-function updatePortfolio(){
-  const tbody = document.querySelector('#portfolioTable tbody');
-  tbody.innerHTML='';
-  for(const key in portfolio){
-    const s = stocks.find(st=>st.name===key);
-    const pl = (s.price-portfolio[key].avg)*portfolio[key].qty;
-    const row = `<tr>
-      <td>${key}</td>
-      <td>${portfolio[key].qty}</td>
-      <td>₹${portfolio[key].avg.toFixed(2)}</td>
-      <td>₹${s.price.toFixed(2)}</td>
-      <td class="${pl>=0?'pl-positive':'pl-negative'}">₹${pl.toFixed(2)}</td>
-    </tr>`;
-    tbody.innerHTML+=row;
-  }
-}
-
-// ======== CHART ========
-const ctx = document.getElementById('stockChart').getContext('2d');
-const chart = new Chart(ctx,{
-  type:'line',
-  data:{ labels:[], datasets:[] },
-  options:{ responsive:true, plugins:{ legend:{display:true} } }
-});
-function updateChart(){
-  chart.data.labels = stocks.map(s=>s.name);
-  chart.data.datasets = [{ label:'Current Price', data:stocks.map(s=>s.price), borderColor:'#007bff', backgroundColor:'rgba(0,123,255,0.2)' }];
-  chart.update();
-}
-
-// ======== THEME ========
-function toggleTheme(){ 
-  darkMode=!darkMode; 
-  document.body.classList.toggle('dark', darkMode); 
-}
-
-window.onload = () => {
-  darkMode = localStorage.getItem('darkMode') === 'true';
-  document.body.classList.toggle('dark', darkMode);
-};
-function toggleTheme(){ 
-  darkMode = !darkMode; 
-  document.body.classList.toggle('dark', darkMode); 
-  localStorage.setItem('darkMode', darkMode);
-}
-
-function createStockContainer(stock){
-  const container = document.getElementById('stockContainers');
-  const div = document.createElement('div');
-  div.id = stock.name;
-  div.className='tab card';
-  div.innerHTML = `
-    <div class="stock-head"><h2>${stock.name}</h2><span>₹${stock.price}</span></div>
-    <div class="stockActions">
-      <input type="number" id="buyQty_${stock.name}" placeholder="Qty">
-      <button class="btn btn-primary" onclick="buyStock('${stock.name}')">Buy</button>
-      <input type="number" id="sellQty_${stock.name}" placeholder="Qty">
-      <button class="btn btn-danger" onclick="sellStock('${stock.name}')">Sell</button>
-    </div>
-  `;
-  container.appendChild(div);
-}
-
-/* ---------- UI boot ---------- */
+/* ---------- App Logic ---------- */
 function showApp(){
   document.getElementById("loginSection").style.display = "none";
   document.getElementById("appSection").style.display = "block";
@@ -585,39 +262,38 @@ function showApp(){
   buildTabs();
   updateBalanceUI();
   loadStocksUI();
-  // timers
   clearIntervals();
   window._updatePricesInterval = setInterval(updatePrices, 5000);
-  window._randomEventsInterval = setInterval(randomEvents, 7000);
   window._dividendsInterval = setInterval(giveDividends, 15000);
 }
+
 function initMarketIfNeeded(){
-  // if stocks empty, initialize market skeleton from stockList
   stockList.forEach(s => {
     if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
     stocks[s].positions = stocks[s].positions || [];
     stocks[s].history = stocks[s].history || [];
-    stocks[s].price = stocks[s].price || 1000 + Math.random()*200;
   });
 }
 
 function clearIntervals(){
   if(window._updatePricesInterval) clearInterval(window._updatePricesInterval);
-  if(window._randomEventsInterval) clearInterval(window._randomEventsInterval);
   if(window._dividendsInterval) clearInterval(window._dividendsInterval);
 }
 
-/* ---------- Tabs & Market UI ---------- */
 function buildTabs(){
   const tabs = document.getElementById("stockTabs");
   tabs.innerHTML = "";
-  // portfolio tab
+  
   const portBtn = document.createElement("button");
   portBtn.innerText = "📊 Portfolio";
   portBtn.onclick = () => showTab("portfolio");
   tabs.appendChild(portBtn);
 
-  // admin tab (only for admin)
+  const incomeBtn = document.createElement("button");
+  incomeBtn.innerText = "💰 Income";
+  incomeBtn.onclick = () => showTab("income");
+  tabs.appendChild(incomeBtn);
+
   if(currentUser === "admin"){
     const adminBtn = document.createElement("button");
     adminBtn.innerText = "⚙️ Admin Panel";
@@ -625,127 +301,87 @@ function buildTabs(){
     tabs.appendChild(adminBtn);
   }
 
-  // per-stock tabs
   stockList.forEach(s => {
     const b = document.createElement("button");
     b.innerText = s;
     b.onclick = () => showTab(s);
     tabs.appendChild(b);
   });
-  // mark first as active initially
-  const first = tabs.querySelector("button");
-  if(first) first.classList.add("active");
 }
 
-function showTab(tab){
-  // highlight active
-  document.querySelectorAll("#stockTabs button").forEach(b => b.classList.remove("active"));
-  const btn = Array.from(document.querySelectorAll("#stockTabs button")).find(x=>x.innerText===tab || (tab==="portfolio" && x.innerText.includes("Portfolio")) || (tab==="adminPanel" && x.innerText.includes("Admin")));
-  if(btn) btn.classList.add("active");
-
-  // hide all tabs
+function showTab(tab) {
   document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
-  // show or build
-  if(tab === "portfolio") {
+  document.querySelectorAll("#stockTabs button").forEach(b => b.classList.remove("active"));
+
+  if (tab === "portfolio") {
     buildPortfolioTab();
     document.getElementById("portfolio").style.display = "block";
-  } else if(tab === "adminPanel") {
+  } else if (tab === "income") {
+    buildIncomeTab();
+    document.getElementById("income").style.display = "block";
+  } else if (tab === "adminPanel") {
     buildAdminPanel();
     document.getElementById("adminPanel").style.display = "block";
   } else {
-    // stock tab
+    // Show individual stock tab
     const el = document.getElementById(tab);
-    if(!el) {
-      // build if missing
-      buildSingleStockTab(tab);
-    }
-    document.getElementById(tab).style.display = "block";
+    if (el) el.style.display = "block";
   }
+  
+  const btn = Array.from(document.querySelectorAll("#stockTabs button")).find(x => x.innerText.includes(tab));
+  if (btn) btn.classList.add("active");
 }
 
-/* ---------- Build stock tabs ---------- */
 function loadStocksUI(){
   const container = document.getElementById("stockContainers");
   container.innerHTML = "";
   stockList.forEach(s => buildSingleStockTab(s));
-  // show first stock by default
   if(stockList[0]) showTab(stockList[0]);
 }
 
 function buildSingleStockTab(stockName){
   const container = document.getElementById("stockContainers");
-  // remove existing tab element if present
-  let existing = document.getElementById(stockName);
-  if(existing) existing.remove();
-
   const tab = document.createElement("div");
   tab.className = "tab card";
   tab.id = stockName;
-
   tab.innerHTML = `
     <div class="stock-head">
-      <div>
-        <h2>${stockName}</h2>
-        <div class="small-note">Market instrument &mdash; simulated</div>
-      </div>
-      <div style="min-width:200px; text-align:right;">
-        <div style="font-weight:700; font-size:16px;" id="price-${stockName}">${formatR(stocks[stockName].price)}</div>
-        <div class="muted small-note" id="last-updated-${stockName}">Live</div>
+      <div><h2>${stockName}</h2></div>
+      <div style="text-align:right;">
+        <div id="price-${stockName}" style="font-weight:700; color:var(--primary); font-size:20px;">${formatR(stocks[stockName].price)}</div>
       </div>
     </div>
-
-    <div style="margin-top:12px;">
-      <canvas id="chart-${stockName}" style="max-height:220px;"></canvas>
-    </div>
-
+    <canvas id="chart-${stockName}" style="max-height:220px;"></canvas>
     <div class="stockInfo" id="info-${stockName}"></div>
-
-    <div class="stockActions" style="margin-top:10px;">
+    <div class="stockActions">
       <input id="qty-${stockName}" type="number" min="1" value="1" />
       <button class="btn btn-primary" onclick="buyStock('${stockName}')">Buy</button>
-      <button class="btn" style="background:var(--danger); color:white;" onclick="sellStock('${stockName}')">Sell</button>
-      <div style="flex:1"></div>
-      <div class="muted small-note">Tip: positions are listed separately (no averaging).</div>
+      <button class="btn btn-danger" onclick="sellStock('${stockName}')">Sell</button>
     </div>
   `;
-
   container.appendChild(tab);
-
-  // initialize chart
-  const ctx = tab.querySelector(`#chart-${stockName}`);
-  const c = new Chart(ctx.getContext('2d'), {
+  
+  const ctx = tab.querySelector(`#chart-${stockName}`).getContext('2d');
+  charts[stockName] = new Chart(ctx, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: stockName, data: [], borderColor: '#0b74ff', borderWidth:2, fill:false, pointRadius:0 }] },
-    options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{beginAtZero:false}}}
+    data: { labels: [], datasets: [{ data: [], borderColor: '#0b74ff', fill: false, tension: 0.2 }] },
+    options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}}}
   });
-  charts[stockName] = c;
-  // populate initial chart history if any
-  const h = stocks[stockName].history || [];
-  if(h.length){
-    c.data.labels = h.map((_,i)=>i+1);
-    c.data.datasets[0].data = h.map(v=>parseFloat(v));
-    c.update();
-  }
   updateStockInfo(stockName);
 }
 
-/* ---------- Price updates & events ---------- */
 function updatePrices(){
   stockList.forEach(s=>{
     const change = (Math.random()-0.5)*100;
     stocks[s].price = Math.max(50, stocks[s].price + change);
     stocks[s].history.push(parseFloat(stocks[s].price.toFixed(2)));
     if(stocks[s].history.length > 30) stocks[s].history.shift();
-
-    // update chart
-    const chart = charts[s];
-    if(chart){
-      chart.data.labels = stocks[s].history.map((_,i)=>"");
-      chart.data.datasets[0].data = stocks[s].history;
-      chart.data.datasets[0].borderColor = change >= 0 ? '#16a34a' : '#dc2626';
-      chart.update();
+    
+    if(charts[s]){
+      charts[s].data.labels = stocks[s].history.map(() => "");
+      charts[s].data.datasets[0].data = stocks[s].history;
+      charts[s].update();
     }
-    // update price and stock info area
     const priceEl = document.getElementById(`price-${s}`);
     if(priceEl) priceEl.innerText = formatR(stocks[s].price);
     updateStockInfo(s);
@@ -753,328 +389,135 @@ function updatePrices(){
   saveAll();
 }
 
-function randomEvents(){
-  if(Math.random() < 0.22){
-    const st = stockList[Math.floor(Math.random()*stockList.length)];
-    const boom = Math.random() < 0.5;
-    stocks[st].price = Math.max(50, stocks[st].price * (boom ? 1.28 : 0.72));
-    alert(boom ? `🚀 ${st} skyrocketed!` : `⚠️ ${st} had a sharp fall!`);
-    updatePrices(); // immediate apply
-  }
-}
-
-/* ---------- Buy / Sell (positions preserved) ---------- */
 function buyStock(st){
-  const qty = Math.max(1, parseInt(document.getElementById(`qty-${st}`).value || 1));
-  const total = stocks[st].price * qty;
-  if(currentUser === "admin"){ alert("Admin cannot buy. Use admin panel to modify user portfolios."); return; }
-  if(balance < total){ alert("Not enough funds"); return; }
-  if(!confirm(`Buy ${qty} × ${st} for ${formatR(total)}?`)) return;
-  balance -= total;
-  // push position: keep separate buys
-  stocks[st].positions.push({ qty: qty, price: parseFloat(stocks[st].price.toFixed(2)) });
+  const qty = parseInt(document.getElementById(`qty-${st}`).value);
+  if(isNaN(qty) || qty <= 0) return;
+  const cost = stocks[st].price * qty;
+  if(balance < cost){ showNotification("Insufficient Balance!"); return; }
+  
+  balance -= cost;
+  stocks[st].positions.push({ qty: qty, price: stocks[st].price });
+  
+  // Log to Income History
+  incomeHistory.push({
+    time: new Date().toLocaleTimeString(),
+    stock: st,
+    type: "BUY",
+    qty: qty,
+    price: stocks[st].price,
+    total: cost
+  });
+  
   updateBalanceUI();
   updateStockInfo(st);
   saveAll();
+  showNotification(`Bought ${qty} of ${st}`);
 }
-function sellStock(st){
-  const qty = Math.max(1, parseInt(document.getElementById(`qty-${st}`).value || 1));
-  if(currentUser === "admin"){ alert("Admin cannot sell. Use admin panel to modify user portfolios."); return; }
-  const totalOwned = (stocks[st].positions || []).reduce((a,p)=>a + (p.qty||0), 0);
-  if(totalOwned < qty){ alert("Not enough shares to sell"); return; }
-  if(!confirm(`Sell ${qty} × ${st} for ${formatR(stocks[st].price * qty)}?`)) return;
 
-  // FIFO: remove from oldest positions first
+function sellStock(st){
+  const qtyInput = document.getElementById(`qty-${st}`);
+  const qty = parseInt(qtyInput.value);
+  const totalOwned = (stocks[st].positions || []).reduce((a,p)=>a + p.qty, 0);
+  if(totalOwned < qty){ showNotification("Not enough shares!"); return; }
+  
   let remaining = qty;
-  for(let i=0;i<stocks[st].positions.length && remaining>0;i++){
-    const pos = stocks[st].positions[i];
-    if(pos.qty <= remaining){
-      remaining -= pos.qty;
-      pos.qty = 0;
+  for(let i=0; i<stocks[st].positions.length && remaining>0; i++){
+    if(stocks[st].positions[i].qty <= remaining){
+      remaining -= stocks[st].positions[i].qty;
+      stocks[st].positions[i].qty = 0;
     } else {
-      pos.qty -= remaining;
+      stocks[st].positions[i].qty -= remaining;
       remaining = 0;
     }
   }
   stocks[st].positions = stocks[st].positions.filter(p => p.qty > 0);
-  balance += stocks[st].price * qty;
+  const revenue = stocks[st].price * qty;
+  balance += revenue;
+
+  // Log to Income History
+  incomeHistory.push({
+    time: new Date().toLocaleTimeString(),
+    stock: st,
+    type: "SELL",
+    qty: qty,
+    price: stocks[st].price,
+    total: revenue
+  });
+
   updateBalanceUI();
   updateStockInfo(st);
   saveAll();
+  showNotification(`Sold ${qty} of ${st}`);
 }
 
-/* ---------- STOCK INFO UI ---------- */
-function updateStockInfo(st){
-  const s = stocks[st];
-  const infoEl = document.getElementById(`info-${st}`);
-  if(!infoEl) return;
-  const totalOwned = (s.positions || []).reduce((acc,p)=>acc + (p.qty||0), 0);
-  let html = `<strong>Current Price:</strong> ${formatR(s.price)}<br><strong>Owned (total):</strong> ${totalOwned}`;
-  if(totalOwned > 0){
-    html += `<div class="small-note">Positions (separate entries):</div><ul class="positions-list">`;
-    s.positions.forEach((p, idx) => {
-      html += `<li>Qty: ${p.qty} @ ${formatR(parseFloat(p.price))}</li>`;
-    });
-    html += `</ul>`;
+function buildIncomeTab() {
+  const container = document.getElementById("income");
+  let html = `<h2>💰 Income & Transaction History</h2>`;
+  if (incomeHistory.length === 0) {
+    html += `<p class="muted">No transactions yet.</p>`;
   } else {
-    html += `<div class="small-note">You do not own any shares of this company.</div>`;
+    html += `<table><thead><tr><th>Time</th><th>Stock</th><th>Action</th><th>Qty</th><th>Price</th><th>Flow</th></tr></thead><tbody>`;
+    [...incomeHistory].reverse().forEach(entry => {
+      const isBuy = entry.type === "BUY";
+      html += `<tr>
+        <td>${entry.time}</td>
+        <td>${entry.stock}</td>
+        <td><strong>${entry.type}</strong></td>
+        <td>${entry.qty}</td>
+        <td>${formatR(entry.price)}</td>
+        <td class="${isBuy ? 'pl-negative' : 'pl-positive'}">${isBuy ? '-' : '+'}${formatR(entry.total)}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
   }
-  infoEl.innerHTML = html;
+  container.innerHTML = html;
 }
 
-/* ---------- Portfolio ---------- */
+function updateStockInfo(st){
+  const el = document.getElementById(`info-${st}`);
+  if(!el) return;
+  const owned = (stocks[st].positions || []).reduce((a,p)=>a+p.qty,0);
+  el.innerHTML = `<strong>Owned:</strong> ${owned} shares`;
+}
+
 function buildPortfolioTab(){
   const port = document.getElementById("portfolio");
-  let html = `<h2>📊 Portfolio</h2>`;
-  html += `<table><thead><tr><th>Stock</th><th>Qty</th><th>Buy Price</th><th>Current</th><th>P/L</th></tr></thead><tbody>`;
+  let html = `<h2>📊 Portfolio</h2><table><tr><th>Stock</th><th>Qty</th><th>Current</th><th>P/L</th></tr>`;
   stockList.forEach(st => {
-    const s = stocks[st];
-    (s.positions || []).forEach(pos => {
-      if(pos.qty > 0){
-        const pl = (s.price - parseFloat(pos.price)) * pos.qty;
-        const cls = pl >= 0 ? 'pl-positive' : 'pl-negative';
-        html += `<tr>
-          <td>${st}</td>
-          <td>${pos.qty}</td>
-          <td>${formatR(parseFloat(pos.price))}</td>
-          <td>${formatR(s.price)}</td>
-          <td class="${cls}">${formatR(pl)}</td>
-        </tr>`;
-      }
-    });
+    const owned = (stocks[st].positions || []).reduce((a,p)=>a+p.qty,0);
+    if(owned > 0){
+      const cost = (stocks[st].positions || []).reduce((a,p)=>a + (p.qty*p.price),0);
+      const pl = (stocks[st].price * owned) - cost;
+      html += `<tr><td>${st}</td><td>${owned}</td><td>${formatR(stocks[st].price)}</td><td class="${pl>=0?'pl-positive':'pl-negative'}">${formatR(pl)}</td></tr>`;
+    }
   });
-  html += `</tbody></table>`;
-  port.innerHTML = html;
-  document.getElementById("portfolio").style.display = "block";
+  port.innerHTML = html + `</table>`;
 }
 
-/* ---------- DIVIDENDS (combined alert) ---------- */
 function giveDividends(){
-  if(!currentUser || currentUser === "admin") return;
   let totalDiv = 0;
-  let breakdown = [];
-  stockList.forEach(stock => {
-    const s = stocks[stock];
-    const owned = (s.positions || []).reduce((a,p)=>a + (p.qty||0),0);
-    if(owned > 0){
-      // dividend per share: min 200 + small company modifier + random
-      const base = 200;
-      const modifier = (stock.length % 5) * 10;
-      const perShare = base + modifier + Math.floor(Math.random()*101); // 200..~400+
-      const compDividend = perShare * owned;
-      totalDiv += compDividend;
-      breakdown.push(`${stock}: ${owned}×₹${perShare} = ₹${compDividend.toFixed(2)}`);
-    }
+  stockList.forEach(s => {
+    const owned = (stocks[s].positions || []).reduce((a,p)=>a+p.qty,0);
+    if(owned > 0) totalDiv += (owned * 1.50);
   });
   if(totalDiv > 0){
     balance += totalDiv;
-    alert(`💸 Total dividends received: ${formatR(totalDiv)}\nBreakdown:\n${breakdown.join("\n")}`);
     updateBalanceUI();
     saveAll();
+    showNotification(`Dividends: ${formatR(totalDiv)}`);
   }
 }
 
-/* ---------- Random events already implemented above ---------- */
+function updateBalanceUI(){ document.getElementById("balance").innerText = `Balance: ${formatR(balance)}`; }
+function toggleTheme(){ darkMode=!darkMode; document.body.classList.toggle('dark', darkMode); }
+function toggleHelp(){ const p = document.getElementById('helpPanel'); p.style.right = (p.style.right === '0px') ? '-350px' : '0px'; }
 
-/* ---------- Balance UI ---------- */
-function updateBalanceUI(){
-  document.getElementById("balance").innerText = `Balance: ${formatR(balance)}`;
-}
-
-/* ---------- Save on window unload ---------- */
-window.addEventListener("beforeunload", () => { saveAll(); });
-
-/* ---------- ADMIN PANEL (powerful tools) ---------- */
 function buildAdminPanel(){
   const ad = document.getElementById("adminPanel");
-  let html = `<h2>⚙️ Admin Panel</h2><div class="admin-panel-grid">`;
-
-  // left: user list & actions
-  html += `<div class="card user-list">`;
-  html += `<h3 style="margin-top:0">Users</h3>`;
-  for(const u in users){
-    html += `<div class="user-item">
-      <div>
-        <div class="meta"><strong>${u}</strong></div>
-        <div class="muted small-note">Balance: ${formatR(users[u].balance)}</div>
-      </div>
-      <div class="user-actions">
-        <button class="btn btn-ghost" onclick="adminAdjustBalance('${u}')">Adjust Balance</button>
-        <button class="btn btn-primary" onclick="adminEditPortfolio('${u}')">Manage Portfolio</button>
-      </div>
-    </div>`;
-  }
-  html += `</div>`;
-
-  // right: market controls
-  html += `<div class="card" style="padding:14px;">
-    <h3 style="margin-top:0">Market Controls</h3>
-    <div style="display:flex; gap:8px; margin-bottom:8px;">
-      <input id="newStockName" type="text" placeholder="New stock name" />
-      <input id="newStockPrice" type="number" placeholder="Price" />
-      <button class="btn btn-primary" onclick="adminAddStock()">Add Stock</button>
-    </div>
-    <div style="margin-top:10px;">
-      <h4 style="margin:6px 0;">Existing Stocks</h4>
-      <div id="admin-stock-list" style="max-height:260px; overflow:auto;"></div>
-    </div>
-  </div>`;
-
-  html += `</div>`; // admin-grid
-  ad.innerHTML = html;
-
-  // populate existing stocks list
-  renderAdminStockList();
-  ad.style.display = "block";
+  ad.innerHTML = `<h2>⚙️ Admin Panel</h2><p>Use developer console to adjust advanced settings or delete users from localStorage.</p>`;
 }
 
-function renderAdminStockList(){
-  const el = document.getElementById("admin-stock-list");
-  el.innerHTML = "";
-  stockList.forEach(s => {
-    const div = document.createElement("div");
-    div.style.display = "flex";
-    div.style.justifyContent = "space-between";
-    div.style.alignItems = "center";
-    div.style.padding = "8px 6px";
-    div.style.borderBottom = "1px solid #eef4fb";
-    div.innerHTML = `<div style="font-weight:600">${s}</div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <div class="muted small-note">${formatR(stocks[s].price)}</div>
-        <button class="btn btn-ghost" onclick="adminAdjustStockPrice('${s}')">Change Price</button>
-        <button class="btn" style="background:${'#ef4444'}; color:white" onclick="adminRemoveStock('${s}')">Remove</button>
-      </div>`;
-    el.appendChild(div);
-  });
-}
-
-function adminAdjustBalance(username){
-  const amtStr = prompt(`Enter amount to ADD (positive) or SUBTRACT (negative) for ${username} (in ₹):`, "1000");
-  if(amtStr === null) return;
-  const amt = parseFloat(amtStr);
-  if(isNaN(amt)){ alert("Invalid amount"); return; }
-  users[username].balance = (users[username].balance || 0) + amt;
-  localStorage.setItem("users", JSON.stringify(users));
-  alert(`Updated ${username} balance to ${formatR(users[username].balance)}`);
-  buildAdminPanel();
-}
-
-function adminEditPortfolio(username){
-  // open a lightweight manage loop: show current positions, allow add/remove
-  const user = users[username];
-  let msg = `Manage portfolio for ${username}\n\nCurrent positions:\n`;
-  const userPortfolio = user.portfolio || {};
-  stockList.forEach(s => {
-    const positions = (userPortfolio[s] && userPortfolio[s].positions) ? userPortfolio[s].positions : [];
-    positions.forEach(p => { if(p.qty > 0) msg += `${s}: ${p.qty} @ ${formatR(p.price)}\n`; });
-  });
-  msg += `\nChoose an action:\n1) Add position\n2) Remove position (by stock name)\nCancel = abort`;
-  const choice = prompt(msg, "1");
-  if(choice === null) return;
-  if(choice.trim() === "1"){
-    const stockName = prompt("Stock name (existing or new):", stockList[0]);
-    if(!stockName) return;
-    const qty = parseInt(prompt("Qty to add:", "1"));
-    const price = parseFloat(prompt("Buy price per share:", "1000"));
-    if(isNaN(qty) || isNaN(price)){ alert("Invalid qty or price"); return; }
-    // ensure user portfolio object
-    user.portfolio = user.portfolio || {};
-    if(!user.portfolio[stockName]) user.portfolio[stockName] = { price: price, positions: [], history: [] };
-    user.portfolio[stockName].positions = user.portfolio[stockName].positions || [];
-    user.portfolio[stockName].positions.push({ qty: qty, price: parseFloat(price) });
-    // if stock not on market, add to market
-    if(!stockList.includes(stockName)){
-      stockList.push(stockName);
-      stocks[stockName] = { price: parseFloat(price), positions: [], history: [] };
-    }
-    users[username] = user;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert(`Added ${qty} x ${stockName} to ${username}`);
-    buildAdminPanel();
-    return;
-  } else if(choice.trim() === "2"){
-    const stockName = prompt("Enter stock name to remove positions from:");
-    if(!stockName) return;
-    if(!user.portfolio || !user.portfolio[stockName]){ alert("User has no positions in that stock"); return; }
-    const remQty = parseInt(prompt("Qty to remove (will remove FIFO):", "1"));
-    if(isNaN(remQty) || remQty <= 0){ alert("Invalid qty"); return; }
-    // perform FIFO removal
-    let remaining = remQty;
-    const pos = user.portfolio[stockName].positions || [];
-    for(let i=0;i<pos.length && remaining>0;i++){
-      if(pos[i].qty <= remaining){ remaining -= pos[i].qty; pos[i].qty = 0; }
-      else { pos[i].qty -= remaining; remaining = 0; }
-    }
-    user.portfolio[stockName].positions = pos.filter(p => p.qty > 0);
-    users[username] = user;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert(`Removed ${remQty - remaining} shares (attempted ${remQty}) from ${username}'s ${stockName}`);
-    buildAdminPanel();
-    return;
-  } else {
-    return;
-  }
-}
-
-function adminAddStock(){
-  const name = document.getElementById("newStockName").value.trim();
-  const price = parseFloat(document.getElementById("newStockPrice").value || "0");
-  if(!name || isNaN(price) || price <= 0){ alert("Enter valid name & price"); return; }
-  if(stockList.includes(name)){ alert("Stock already exists"); return; }
-  stockList.push(name);
-  stocks[name] = { price: parseFloat(price), positions: [], history: [] };
-  renderAdminStockList();
-  loadStocksUI();
-  alert(`Added ${name} at ${formatR(price)}`);
-}
-
-function adminRemoveStock(name){
-  if(!confirm(`Remove ${name} from market? This will not remove users' positions in stored portfolios.`)) return;
-  stockList = stockList.filter(s => s !== name);
-  delete stocks[name];
-  // remove DOM tab if exists
-  const el = document.getElementById(name);
-  if(el) el.remove();
-  renderAdminStockList();
-  loadStocksUI();
-  alert(`${name} removed from market.`);
-}
-
-function adminAdjustStockPrice(name){
-  const amtStr = prompt(`Set new price for ${name} (enter numeric) — or prefix + or - to change relative:`, `${stocks[name].price.toFixed(2)}`);
-  if(amtStr === null) return;
-  let val = amtStr.trim();
-  if(val.startsWith("+") || val.startsWith("-")){
-    const delta = parseFloat(val);
-    if(isNaN(delta)){ alert("Invalid change"); return; }
-    stocks[name].price = Math.max(1, stocks[name].price + delta);
-  } else {
-    const p = parseFloat(val);
-    if(isNaN(p) || p <= 0){ alert("Invalid price"); return; }
-    stocks[name].price = p;
-  }
-  renderAdminStockList();
-  // update UI price elements and charts
-  const priceEl = document.getElementById(`price-${name}`);
-  if(priceEl) priceEl.innerText = formatR(stocks[name].price);
-  updateStockInfo(name);
-  saveAll();
-  alert(`Updated ${name} price to ${formatR(stocks[name].price)}`);
-}
-
-/* ---------- Initialization on page load ---------- */
-window.onload = () => {
-  // ensure there is at least one default admin user in storage for demo
-  if(!users["alice"]) {
-    // optional sample user so admin panel isn't empty
-    users["alice"] = { password: "alice", balance: 10000, portfolio: {} };
-    localStorage.setItem("users", JSON.stringify(users));
-  }
-  // Pre-populate stocks if user portfolio empty and not logged in yet
-  stockList.forEach(s => {
-    if(!stocks[s]) stocks[s] = { price: 1000 + Math.random()*200, positions: [], history: [] };
-  });
-};
+window.onload = () => { if(!users["alice"]) users["alice"] = { password: "alice", balance: 10000, portfolio: {}, incomeHistory: [] }; };
 </script>
 </body>
 </html>
