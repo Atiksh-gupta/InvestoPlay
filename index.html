@@ -43,7 +43,6 @@
     /* ---------- Animations ---------- */
     @keyframes zoomIn { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }
     @keyframes floatUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-    
     .fade-up { animation: floatUp 0.6s ease-out forwards; }
 
     /* ---------- Layout ---------- */
@@ -52,7 +51,6 @@
 
     nav#stockTabs { width: 260px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; background: var(--card); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); flex-shrink: 0;}
     
-    /* Highlighted Stock Categories */
     .nav-label { 
       font-size: 10px; font-weight: 900; color: var(--primary); padding: 8px 12px; 
       text-transform: uppercase; letter-spacing: 1.5px; margin-top: 15px;
@@ -167,7 +165,6 @@
 </div>
 
 <script>
-// Categorized Dummy Stocks
 const arcadeSectors = {
     "Tech & AI": ["TechNova", "CryptoWave", "RoboWorks", "GameX"],
     "Energy & Eco": ["GreenEnergy", "AquaTech"],
@@ -186,14 +183,8 @@ let currentView = 'TechNova';
 let isRealMarketView = false;
 let themes = ['dark', 'cyber', 'light'], currentTheme = 0;
 
-function toggleGuide() {
-    document.getElementById('guidePanel').classList.toggle('open');
-}
-
-function showLogin() { 
-    document.getElementById('welcomePage').style.display='none'; 
-    document.getElementById('loginScreen').style.display='flex'; 
-}
+function toggleGuide() { document.getElementById('guidePanel').classList.toggle('open'); }
+function showLogin() { document.getElementById('welcomePage').style.display='none'; document.getElementById('loginScreen').style.display='flex'; }
 
 function initDatabase(db, names, startPriceBase) {
     names.forEach(s => { 
@@ -206,12 +197,9 @@ function startApp() {
     document.getElementById('loginScreen').style.display='none'; 
     document.getElementById('mainHeader').style.display='flex';
     document.getElementById('mainApp').style.display='flex';
-    
     initDatabase(arcadeDb, arcadeNames, 100);
     initDatabase(realDb, realNames, 800); 
-
     buildNav(); showStock('TechNova', false);
-    
     setInterval(() => updatePrices(arcadeDb, arcadeNames, 1), 4000); 
     setInterval(() => updatePrices(realDb, realNames, 0.4), 1000);   
     setInterval(rollBalanceCounter, 50);
@@ -231,20 +219,13 @@ function cycleTheme() {
 
 function buildNav() {
     const nav = document.getElementById('stockTabs');
-    let h = `
-        <button onclick="showSystem('portfolio')">📊 Portfolio</button>
-        <button onclick="showSystem('history')">🧾 Transaction Log</button>`;
-    
-    // Render Categorized Arcade Stocks with Highlighted Labels
+    let h = `<button onclick="showSystem('portfolio')">📊 Portfolio</button><button onclick="showSystem('history')">🧾 Transaction Log</button>`;
     for (const [sector, stocks] of Object.entries(arcadeSectors)) {
         h += `<div class="nav-label">${sector}</div>`;
         stocks.forEach(s => h += `<button id="tab-${s}" onclick="showStock('${s}', false)">${s}</button>`);
     }
-    
-    // Render PRO Hub with Highlighted Label
     h += `<div class="nav-label pro-label">Real Market Hub [PRO]</div>`;
     realNames.forEach(s => h += `<button id="tab-${s}" onclick="showStock('${s}', true)">${s} <span style="float:right; opacity:0.5;">PRO</span></button>`);
-    
     nav.innerHTML = h;
 }
 
@@ -260,20 +241,14 @@ function updateHeaderLabels(isReal) {
     const balLabel = document.getElementById('balanceLabel');
     const balDisp = document.getElementById('balanceDisp');
     if(isReal) {
-        balLabel.innerText = "PRO LIVE WALLET";
-        balLabel.style.color = "var(--gold)";
-        balDisp.classList.add('real-mode-text');
+        balLabel.innerText = "PRO LIVE WALLET"; balLabel.style.color = "var(--gold)"; balDisp.classList.add('real-mode-text');
     } else {
-        balLabel.innerText = "ARCADE CAPITAL";
-        balLabel.style.color = "var(--muted)";
-        balDisp.classList.remove('real-mode-text');
+        balLabel.innerText = "ARCADE CAPITAL"; balLabel.style.color = "var(--muted)"; balDisp.classList.remove('real-mode-text');
     }
 }
 
 function renderPortfolio() {
-    let h = `<div class="fade-up"><h2>Portfolio Overview</h2>
-        <table><tr><th>Ticker</th><th>Market</th><th>Qty</th><th>Live Price</th><th>Net P/L</th></tr>`;
-    
+    let h = `<div><h2>Portfolio Overview</h2><table><tr><th>Ticker</th><th>Market</th><th>Qty</th><th>Live Price</th><th>Net P/L</th></tr>`;
     [arcadeNames, realNames].forEach((names, index) => {
         let db = index === 0 ? arcadeDb : realDb;
         let marketType = index === 0 ? 'Arcade' : '<span style="color:var(--gold)">PRO Live</span>';
@@ -292,81 +267,60 @@ function renderHistory() {
     let h = `<div class="fade-up"><h2>Terminal Logs</h2>`;
     [...history].reverse().forEach(e => {
         h += `<div style="padding:10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
-            <span><b>${e.act}</b> ${e.sym} (${e.qty})</span>
-            <span style="color:var(--primary)">₹${e.tot.toFixed(2)}</span>
-        </div>`;
+            <span><b>${e.act}</b> ${e.sym} (${e.qty})</span><span style="color:var(--primary)">₹${e.tot.toFixed(2)}</span></div>`;
     });
     document.getElementById('renderZone').innerHTML = h + `</div>`;
 }
 
 function showStock(s, isReal) {
-    currentView = s;
-    isRealMarketView = isReal;
-    let db = isReal ? realDb : arcadeDb;
-    let colorTheme = isReal ? 'var(--gold)' : 'var(--primary)';
-    
+    currentView = s; isRealMarketView = isReal;
+    let db = isReal ? realDb : arcadeDb; let colorTheme = isReal ? 'var(--gold)' : 'var(--primary)';
     updateHeaderLabels(isReal);
     document.querySelectorAll('#stockTabs button').forEach(b => { b.classList.remove('active'); b.classList.remove('active-real'); }); 
     document.getElementById(`tab-${s}`).classList.add(isReal ? 'active-real' : 'active');
-    
     document.getElementById('renderZone').innerHTML = `
         <div class="fade-up" style="display:flex; flex-direction:column; flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h1 style="margin:0; display:inline-block;">${s}</h1>
-                    ${isReal ? '<span class="pro-badge">PRO MODE</span>' : ''}
-                    <div style="font-size:11px; font-weight:800; color:var(--muted); margin-top:4px;">${isReal ? 'LIVE NSE/BSE TERMINAL' : 'SIMULATED ARCADE ASSET'}</div>
-                </div>
+                <div><h1>${s}</h1>${isReal ? '<span class="pro-badge">PRO MODE</span>' : ''}</div>
                 <div id="price-${s}" style="font-size:36px; font-weight:900; color:${colorTheme};">₹${db[s].p.toFixed(2)}</div>
             </div>
             <div style="flex:1; min-height:250px; margin-top:20px;"><canvas id="canvas-${s}"></canvas></div>
             <div class="trade-panel">
                 <div style="font-size:18px; font-weight:900;">POSITION: <span id="owned-${s}" style="color:${colorTheme}">${db[s].qty} Units</span></div>
-                <div style="display:flex; gap:10px;">
-                    <input id="qty-${s}" type="number" value="1" min="1">
-                    <button class="btn btn-buy" onclick="trade('${s}', 'BUY', ${isReal})">EXECUTE BUY</button>
-                    <button class="btn btn-sell" onclick="trade('${s}', 'SELL', ${isReal})">EXECUTE SELL</button>
+                <div style="display:flex; gap:10px;"><input id="qty-${s}" type="number" value="1" min="1">
+                    <button class="btn btn-buy" onclick="trade('${s}', 'BUY', ${isReal})">BUY</button>
+                    <button class="btn btn-sell" onclick="trade('${s}', 'SELL', ${isReal})">SELL</button>
                 </div>
             </div>
         </div>`;
-        
     const ctx = document.getElementById(`canvas-${s}`).getContext('2d'); 
     if(charts.instance) charts.instance.destroy();
     charts.active = s; 
     charts.instance = new Chart(ctx, { 
-        type: 'line', 
-        data: { labels: db[s].hist.map(()=>''), datasets: [{ data: db[s].hist, borderColor: colorTheme, borderWidth: 3, tension: 0.3, fill:true, backgroundColor: isReal ? 'rgba(245,158,11,0.1)' : 'rgba(14,165,233,0.1)', pointRadius: 0 }] }, 
+        type: 'line', data: { labels: db[s].hist.map(()=>''), datasets: [{ data: db[s].hist, borderColor: colorTheme, borderWidth: 3, tension: 0.3, fill:true, backgroundColor: isReal ? 'rgba(245,158,11,0.1)' : 'rgba(14,165,233,0.1)', pointRadius: 0 }] }, 
         options: { maintainAspectRatio: false, animation: false, plugins: { legend: false }, scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.05)' } } } } 
     });
 }
 
 function trade(s, act, isReal) {
-    let db = isReal ? realDb : arcadeDb;
-    let q = parseInt(document.getElementById(`qty-${s}`).value); 
-    let total = db[s].p * q;
+    let db = isReal ? realDb : arcadeDb; let q = parseInt(document.getElementById(`qty-${s}`).value); let total = db[s].p * q;
     if(act === 'BUY') {
-        if(isReal && targetRealBalance < total) return notify("Insufficient Pro Funds!", 'var(--danger)');
-        if(!isReal && targetBalance < total) return notify("Insufficient Arcade Funds!", 'var(--danger)');
+        if(isReal && targetRealBalance < total) return notify("Low Pro Funds!", 'var(--danger)');
+        if(!isReal && targetBalance < total) return notify("Low Arcade Funds!", 'var(--danger)');
         if(isReal) targetRealBalance -= total; else targetBalance -= total;
         db[s].qty += q; db[s].totalInvested += total;
-        notify(`Order Confirmed: Bought ${q} ${s}`);
     } else {
-        if(db[s].qty < q) return notify("No open position!", 'var(--danger)');
+        if(db[s].qty < q) return notify("No position!", 'var(--danger)');
         if(isReal) targetRealBalance += total; else targetBalance += total;
-        db[s].qty -= q; 
-        db[s].totalInvested = db[s].qty === 0 ? 0 : db[s].totalInvested - ((db[s].totalInvested/(db[s].qty+q)) * q);
-        notify(`Execution Success: Sold ${q} ${s}`);
+        db[s].qty -= q; db[s].totalInvested = db[s].qty === 0 ? 0 : db[s].totalInvested - ((db[s].totalInvested/(db[s].qty+q)) * q);
     }
     history.push({ act, sym: s, qty: q, tot: total }); 
-    document.getElementById(`owned-${s}`).innerText = db[s].qty + " Units"; 
-    calcNetWorth();
+    document.getElementById(`owned-${s}`).innerText = db[s].qty + " Units"; calcNetWorth();
 }
 
 function rollBalanceCounter() {
-    if(Math.abs(currentBalance - targetBalance) < 1) currentBalance = targetBalance;
-    else currentBalance += (targetBalance - currentBalance) * 0.15;
-    if(Math.abs(currentRealBalance - targetRealBalance) < 1) currentRealBalance = targetRealBalance;
-    else currentRealBalance += (targetRealBalance - currentRealBalance) * 0.15;
+    currentBalance += (targetBalance - currentBalance) * 0.15;
+    currentRealBalance += (targetRealBalance - currentRealBalance) * 0.15;
     let dispBal = isRealMarketView ? currentRealBalance : currentBalance;
     document.getElementById('balanceDisp').innerText = `₹${dispBal.toLocaleString('en-IN', {minimumFractionDigits:2})}`;
 }
@@ -380,20 +334,18 @@ function calcNetWorth() {
 
 function updatePrices(db, names, multiplier = 1) {
     names.forEach(s => {
-        let change = (Math.random() - 0.5) * 40 * multiplier; 
-        db[s].p = Math.max(10, db[s].p + change); 
-        db[s].hist.push(db[s].p); 
+        let change = (Math.random() - 0.5) * 40 * multiplier; db[s].p = Math.max(10, db[s].p + change); db[s].hist.push(db[s].p); 
         if(db[s].hist.length > 30) db[s].hist.shift();
         if(charts.active === s && currentView === s) { 
             const pel = document.getElementById(`price-${s}`); 
-            if(pel) { 
-                pel.innerText = `₹${db[s].p.toFixed(2)}`; 
-                pel.style.color = change > 0 ? 'var(--success)' : 'var(--danger)'; 
+            if(pel) { pel.innerText = `₹${db[s].p.toFixed(2)}`; pel.style.color = change > 0 ? 'var(--success)' : 'var(--danger)'; 
                 charts.instance.data.datasets[0].data = db[s].hist; charts.instance.update('none');
             } 
         }
     });
     calcNetWorth();
+    // AUTO-REFRESH PORTFOLIO VIEW
+    if (currentView === 'portfolio') renderPortfolio();
 }
 </script>
 </body>
