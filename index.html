@@ -203,6 +203,7 @@ function startApp() {
     setInterval(() => updatePrices(arcadeDb, arcadeNames, 1), 4000); 
     setInterval(() => updatePrices(realDb, realNames, 0.4), 1000);   
     setInterval(rollBalanceCounter, 50);
+    setInterval(processDividends, 30000);
 }
 
 function notify(msg, color='var(--primary)') {
@@ -347,6 +348,30 @@ function updatePrices(db, names, multiplier = 1) {
     // AUTO-REFRESH PORTFOLIO VIEW
     if (currentView === 'portfolio') renderPortfolio();
 }
+
+function processDividends() {
+    // Process Arcade Stocks
+    arcadeNames.forEach(s => {
+        if (arcadeDb[s].qty > 0) {
+            let payout = (arcadeDb[s].p * 0.20) * arcadeDb[s].qty;
+            targetBalance += payout;
+            notify(`💰 Dividend: ₹${payout.toFixed(2)} received from ${s}`, 'var(--success)');
+        }
+    });
+
+    // Process Pro Stocks
+    realNames.forEach(s => {
+        if (realDb[s].qty > 0) {
+            let payout = (realDb[s].p * 0.20) * realDb[s].qty;
+            targetRealBalance += payout;
+            notify(`👑 PRO Dividend: ₹${payout.toFixed(2)} received from ${s}`, 'var(--gold)');
+        }
+    });
+    
+    // Refresh UI if on portfolio
+    if (currentView === 'portfolio') renderPortfolio();
+}
+  
 </script>
 </body>
 </html>
