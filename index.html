@@ -193,17 +193,88 @@ function initDatabase(db, names, startPriceBase) {
     });
 }
 
-function startApp() {
-    document.getElementById('loginScreen').style.display='none'; 
-    document.getElementById('mainHeader').style.display='flex';
-    document.getElementById('mainApp').style.display='flex';
-    initDatabase(arcadeDb, arcadeNames, 100);
-    initDatabase(realDb, realNames, 800); 
-    buildNav(); showStock('TechNova', false);
+function startApp(savedData = null) {
+    document.getElementById('loginScreen').style.display = 'none'; 
+    document.getElementById('mainHeader').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('userTag').innerText = currentUser ? `@${currentUser}` : "GUEST";
+
+    if (savedData && savedData.arcadeDb) {
+        // Restore saved state
+        arcadeDb = savedData.arcadeDb;
+        realDb = savedData.realDb;
+        targetBalance = savedData.balance;
+        targetRealBalance = savedData.realBalance;
+        history = savedData.history;
+    } else {
+        // Fresh start
+        initDatabase(arcadeDb, arcadeNames, 100);
+        initDatabase(realDb, realNames, 800);
+    }
+
+    buildNav(); 
+    showStock('TechNova', false);
+
+    // Existing Intervals
     setInterval(() => updatePrices(arcadeDb, arcadeNames, 1), 4000); 
     setInterval(() => updatePrices(realDb, realNames, 0.4), 1000);   
     setInterval(rollBalanceCounter, 50);
-    setInterval(processDividends, 30000);
+    setInterval(processDividends, 30000); 
+}
+
+let currentUser = null;
+
+function handleAuth(type) {
+    const user = document.getElementById('uname').value.trim();
+    const pass = document.getElementById('upass').value.trim();
+
+    if (!user || !pass) return notify("Enter credentials!", "var(--danger)");
+
+    let accounts = JSON.parse(localStorage.getItem('investo_accounts') || "{}");
+
+    if (type === 'signup') {
+        if (accounts[user]) return notify("User already exists!", "var(--danger)");
+        // Initialize fresh data for new user
+        accounts[user] = { 
+            password: pass, 
+            data: { 
+                arcadeDb: null, // Will be generated on first start
+                realDb: null,
+                balance: 10000, 
+                realBalance: 200000,
+                history: [] 
+            } 
+        };
+        localStorage.setItem('investo_accounts', JSON.stringify(accounts));
+        notify("Account Created! Please Login.", "var(--success)");
+    } else {
+        if (!accounts[user] || accounts[user].password !== pass) {
+            return notify("Invalid Credentials!", "var(--danger)");
+        }
+        currentUser = user;
+        startApp(accounts[user].data);
+    }
+}
+
+function saveUserData() {
+    if (!currentUser) return; // Don't save for guests
+
+    let accounts = JSON.parse(localStorage.getItem('investo_accounts') || "{}");
+    if (accounts[currentUser]) {
+        accounts[currentUser].data = {
+            arcadeDb,
+            realDb,
+            balance: targetBalance,
+            realBalance: targetRealBalance,
+            history
+        };
+        localStorage.setItem('investo_accounts', JSON.stringify(accounts));
+    }
+}
+
+function logout() {
+    saveUserData(); // One last save
+    location.reload(); // Hard reset to login screen
 }
 
 function notify(msg, color='var(--primary)') {
