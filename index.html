@@ -648,6 +648,62 @@
       gap: 16px;
     }
 
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .tool-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .tool-card h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+
+    .tool-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-stack {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      font-weight: 800;
+    }
+
+    .list-item small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
     .achievement {
       display: flex;
       align-items: center;
@@ -751,10 +807,110 @@
       backdrop-filter: blur(12px);
     }
 
+    .page-screen {
+      background:
+        linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(245, 158, 11, 0.08)),
+        radial-gradient(circle at 20% 15%, rgba(124, 58, 237, 0.32), transparent 18rem),
+        radial-gradient(circle at 85% 78%, rgba(34, 197, 94, 0.2), transparent 22rem),
+        var(--bg);
+    }
+
+    .home-page {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
     .modal-card {
       width: min(560px, 100%);
       padding: 22px;
       background: var(--panel);
+    }
+
+    .hero-card {
+      width: 100%;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .hero-kicker {
+      color: var(--gold);
+      font-weight: 950;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .hero-title {
+      margin: 10px 0 12px;
+      font-size: clamp(46px, 9vw, 92px);
+      line-height: 0.88;
+      letter-spacing: 0;
+    }
+
+    .hero-title span {
+      color: var(--brand);
+    }
+
+    .coin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .coin-tile {
+      min-height: 86px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      font-weight: 950;
+      box-shadow: inset 0 -18px 30px rgba(14, 165, 233, 0.08);
+    }
+
+    .guide-ribbon {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .guide-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .guide-step b {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      background: var(--brand);
+    }
+
+    .guide-step strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .guide-step span {
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.4;
     }
 
     .modal-card h1 {
@@ -777,7 +933,7 @@
     }
 
     .login-actions {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .easy-list {
@@ -844,8 +1000,14 @@
       }
 
       .trade-layout,
-      .grid-2 {
+      .grid-2,
+      .tool-grid,
+      .home-page {
         grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-height: auto;
       }
     }
 
@@ -878,7 +1040,12 @@
         align-items: stretch;
       }
 
-      .login-grid {
+      .login-grid,
+      .login-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .coin-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -887,36 +1054,54 @@
 <body class="dark">
   <div class="toast-stack" id="toastStack"></div>
 
-  <section class="modal-backdrop" id="homeModal">
-    <div class="modal-card">
-      <div class="brand" style="margin-bottom: 18px;">
-        <div class="brand-mark">IP</div>
-        <div>INVESTO <span>PLAY</span></div>
+  <section class="modal-backdrop page-screen" id="homeModal">
+    <div class="home-page">
+      <div class="modal-card hero-card">
+        <div>
+          <div class="brand" style="margin-bottom: 22px;">
+            <div class="brand-mark">IP</div>
+            <div>INVESTO <span>PLAY</span></div>
+          </div>
+          <div class="hero-kicker">Dummy money. Real learning.</div>
+          <h1 class="hero-title">Investing made <span>playable</span></h1>
+          <p>
+            Build a portfolio, react to market news, unlock rewards, and learn how buying and selling works without using real money.
+          </p>
+          <div class="coin-grid" aria-hidden="true">
+            <div class="coin-tile">BUY</div>
+            <div class="coin-tile">HOLD</div>
+            <div class="coin-tile">SELL</div>
+          </div>
+        </div>
+        <div class="home-actions">
+          <button class="primary-btn" id="openLoginBtn">Go To Login</button>
+          <button class="ghost-btn" id="quickPlayBtn">Quick Guest Start</button>
+        </div>
       </div>
-      <h1>Learn investing like a game</h1>
-      <p>
-        Practice with fake money, simple buy and sell buttons, goals, rewards, and saved progress on this browser.
-      </p>
-      <ul class="easy-list">
-        <li>1. Pick a stock.</li>
-        <li>2. Buy a few units.</li>
-        <li>3. Sell later if the price goes up.</li>
-      </ul>
-      <div class="home-actions">
-        <button class="primary-btn" id="openLoginBtn">Login / Create Player</button>
-        <button class="ghost-btn" id="quickPlayBtn">Quick Play</button>
+
+      <div class="modal-card guide-ribbon">
+        <div>
+          <div class="hero-kicker">Starter Guide</div>
+          <h2 style="margin: 8px 0 6px; font-size: 30px;">How it works</h2>
+          <p style="margin-top: 0;">Simple enough for beginners, polished enough to feel like a real trading terminal.</p>
+        </div>
+        <div class="guide-step"><b>1</b><div><strong>Choose a stock</strong><span>Arcade stocks are easy. Pro mode is still simulated, just bigger numbers.</span></div></div>
+        <div class="guide-step"><b>2</b><div><strong>Buy with fake cash</strong><span>Your cash goes down and your owned units go up.</span></div></div>
+        <div class="guide-step"><b>3</b><div><strong>Watch the price</strong><span>News events and price moves make the game feel alive.</span></div></div>
+        <div class="guide-step"><b>4</b><div><strong>Sell for profit</strong><span>If the price is higher than your buy price, your profit grows.</span></div></div>
+        <button class="primary-btn" id="ribbonLoginBtn">Start From Login</button>
       </div>
     </div>
   </section>
 
-  <section class="modal-backdrop hidden" id="loginModal">
+  <section class="modal-backdrop page-screen hidden" id="loginModal">
     <div class="modal-card">
       <div class="brand" style="margin-bottom: 18px;">
         <div class="brand-mark">IP</div>
         <div>LOCAL <span>LOGIN</span></div>
       </div>
-      <h1>Save your progress</h1>
-      <p>Your name and progress stay locally in this browser. No account, no server, no real money.</p>
+      <h1>Player Login</h1>
+      <p>Sign up or continue as a guest. Your progress saves locally in this browser only.</p>
       <div class="field">
         <label for="playerName">Player name</label>
         <input id="playerName" maxlength="18" placeholder="Example: Atiksh" value="Atiksh" />
@@ -926,13 +1111,14 @@
         <input id="playerPin" inputmode="numeric" maxlength="4" placeholder="1234" type="password" />
       </div>
       <div class="login-actions">
-        <button class="primary-btn" id="startBtn">Start</button>
+        <button class="primary-btn" id="startBtn">Login / Sign Up</button>
+        <button class="ghost-btn" id="loginGuestBtn">Continue Guest</button>
         <button class="ghost-btn" id="backHomeBtn">Back</button>
       </div>
     </div>
   </section>
 
-  <div class="app-shell" aria-live="polite">
+  <div class="app-shell hidden" id="appShell" aria-live="polite">
     <header>
       <div class="brand">
         <div class="brand-mark">IP</div>
@@ -945,6 +1131,7 @@
         </div>
         <button class="icon-btn" id="themeBtn" title="Change theme">T</button>
         <button class="icon-btn" id="helpBtn" title="Open guide">?</button>
+        <button class="ghost-btn" id="homeBtn">Home</button>
         <button class="ghost-btn" id="saveBtn">Save</button>
         <button class="danger-btn" id="resetBtn">Reset</button>
       </div>
@@ -1007,6 +1194,7 @@
               <button id="tradeViewBtn" class="active">Trade</button>
               <button id="portfolioViewBtn">Portfolio</button>
               <button id="logsViewBtn">Logs</button>
+              <button id="toolsViewBtn">Tools</button>
               <button id="goalsViewBtn">Goals</button>
             </div>
           </div>
@@ -1079,6 +1267,7 @@
       ["five_trades", "Market Mover", "Complete 5 trades."],
       ["profit_1k", "Profit Spark", "Reach Rs. 1,000 total P/L."],
       ["diversified", "Diversified", "Hold 3 different stocks."],
+      ["planner", "Smart Planner", "Create a reminder, FD, or SIP."],
       ["arcade_goal", "Arcade Winner", "Reach the Arcade net worth goal."],
       ["pro_goal", "Pro Winner", "Reach the Pro net worth goal."]
     ];
@@ -1097,18 +1286,26 @@
         pro: { cash: 200000, realized: 0 }
       },
       stocks: {},
+      reminders: [],
+      fds: [],
+      sips: [],
+      orderQty: {},
+      draftInputs: {},
       logs: [],
       unlocked: {}
     };
 
     const el = {
+      appShell: document.getElementById("appShell"),
       homeModal: document.getElementById("homeModal"),
       loginModal: document.getElementById("loginModal"),
       playerName: document.getElementById("playerName"),
       playerPin: document.getElementById("playerPin"),
       openLoginBtn: document.getElementById("openLoginBtn"),
+      ribbonLoginBtn: document.getElementById("ribbonLoginBtn"),
       quickPlayBtn: document.getElementById("quickPlayBtn"),
       startBtn: document.getElementById("startBtn"),
+      loginGuestBtn: document.getElementById("loginGuestBtn"),
       backHomeBtn: document.getElementById("backHomeBtn"),
       playerLabel: document.getElementById("playerLabel"),
       rankLabel: document.getElementById("rankLabel"),
@@ -1132,9 +1329,11 @@
       tradeViewBtn: document.getElementById("tradeViewBtn"),
       portfolioViewBtn: document.getElementById("portfolioViewBtn"),
       logsViewBtn: document.getElementById("logsViewBtn"),
+      toolsViewBtn: document.getElementById("toolsViewBtn"),
       goalsViewBtn: document.getElementById("goalsViewBtn"),
       themeBtn: document.getElementById("themeBtn"),
       helpBtn: document.getElementById("helpBtn"),
+      homeBtn: document.getElementById("homeBtn"),
       saveBtn: document.getElementById("saveBtn"),
       resetBtn: document.getElementById("resetBtn"),
       toastStack: document.getElementById("toastStack")
@@ -1181,6 +1380,11 @@
         const saved = JSON.parse(raw);
         if (!saved || !saved.stocks || !saved.wallets) return false;
         Object.assign(state, saved);
+        state.reminders ||= [];
+        state.fds ||= [];
+        state.sips ||= [];
+        state.orderQty ||= {};
+        state.draftInputs ||= {};
         return true;
       } catch {
         return false;
@@ -1202,10 +1406,26 @@
       state.pin = String(pin || "").slice(0, 4);
       el.homeModal.classList.add("hidden");
       el.loginModal.classList.add("hidden");
+      el.appShell.classList.remove("hidden");
       save();
       renderAll();
       gameFeel("start");
       toast("Welcome", "Progress is saved locally for " + state.player + ".", "info");
+    }
+
+    function openLoginPage() {
+      el.homeModal.classList.add("hidden");
+      el.loginModal.classList.remove("hidden");
+      el.appShell.classList.add("hidden");
+      haptic(12);
+    }
+
+    function openHomePage() {
+      save();
+      el.loginModal.classList.add("hidden");
+      el.appShell.classList.add("hidden");
+      el.homeModal.classList.remove("hidden");
+      haptic(12);
     }
 
     function formatMoney(value) {
@@ -1278,10 +1498,30 @@
       save();
     }
 
+    function rememberDraft(id, fallback = "") {
+      return state.draftInputs[id] ?? fallback;
+    }
+
+    function bindDrafts(container = document) {
+      container.querySelectorAll("[data-draft]").forEach((field) => {
+        const key = field.dataset.draft;
+        if (state.draftInputs[key] !== undefined) field.value = state.draftInputs[key];
+        field.addEventListener("input", () => {
+          state.draftInputs[key] = field.value;
+          save();
+        });
+        field.addEventListener("change", () => {
+          state.draftInputs[key] = field.value;
+          save();
+        });
+      });
+    }
+
     function renderNav() {
       let html = "";
       html += navButton("Portfolio", "portfolio", "portfolio");
       html += navButton("Transaction Log", "logs", "logs");
+      html += navButton("Money Tools", "tools", "tools");
       html += navButton("Goals", "goals", "goals");
       Object.entries(sectors).forEach(([market, groups]) => {
         Object.entries(groups).forEach(([sector, rows]) => {
@@ -1354,6 +1594,7 @@
       setViewTabs();
       if (state.view === "portfolio") return renderPortfolio();
       if (state.view === "logs") return renderLogs();
+      if (state.view === "tools") return renderTools();
       if (state.view === "goals") return renderGoals();
       return renderTrade();
     }
@@ -1362,6 +1603,7 @@
       el.tradeViewBtn.classList.toggle("active", state.view === "trade");
       el.portfolioViewBtn.classList.toggle("active", state.view === "portfolio");
       el.logsViewBtn.classList.toggle("active", state.view === "logs");
+      el.toolsViewBtn.classList.toggle("active", state.view === "tools");
       el.goalsViewBtn.classList.toggle("active", state.view === "goals");
     }
 
@@ -1370,6 +1612,8 @@
       const change = stock.price - stock.previous;
       const costBasis = stock.owned ? stock.avg * stock.owned : 0;
       const stockPL = stock.owned * stock.price - costBasis;
+      const qtyKey = `qty-${stock.symbol}`;
+      const savedQty = Math.max(1, Math.floor(Number(rememberDraft(qtyKey, state.orderQty[stock.symbol] || 1)) || 1));
       el.viewTitle.textContent = stock.symbol;
       el.viewSubtitle.textContent = `${stock.sector} stock in ${stock.market === "pro" ? "simulated Pro" : "Arcade"} market`;
 
@@ -1399,7 +1643,7 @@
 
             <div class="field">
               <label for="qtyInput">How many units?</label>
-              <input id="qtyInput" type="number" min="1" step="1" value="1" />
+              <input id="qtyInput" data-draft="${qtyKey}" type="number" min="1" step="1" value="${savedQty}" />
             </div>
             <div class="quick-row">
               <button data-qty="1">1</button>
@@ -1414,6 +1658,11 @@
         </div>`;
 
       drawChart(document.getElementById("priceCanvas"), stock);
+      bindDrafts(el.viewBody);
+      document.getElementById("qtyInput").addEventListener("input", (event) => {
+        state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(event.target.value) || 1));
+        save();
+      });
       document.getElementById("buyBtn").addEventListener("click", () => trade("BUY"));
       document.getElementById("sellBtn").addEventListener("click", () => trade("SELL"));
       el.viewBody.querySelectorAll("[data-qty]").forEach((button) => {
@@ -1424,6 +1673,9 @@
           } else {
             input.value = button.dataset.qty;
           }
+          state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(input.value) || 1));
+          state.draftInputs[qtyKey] = input.value;
+          save();
         });
       });
     }
@@ -1491,6 +1743,66 @@
         </div>`;
     }
 
+    function renderTools() {
+      el.viewTitle.textContent = "Money Tools";
+      el.viewSubtitle.textContent = "Professional-style tools, simplified for fake-money learning";
+      const mode = state.mode;
+      const stockOptions = marketStocks(mode).map((s) => `<option value="${s.symbol}">${s.symbol}</option>`).join("");
+      const reminders = state.reminders.filter((r) => r.mode === mode);
+      const fds = state.fds.filter((fd) => fd.mode === mode);
+      const sips = state.sips.filter((sip) => sip.mode === mode);
+      el.viewBody.innerHTML = `
+        <div class="tool-grid">
+          <section class="tool-card">
+            <h3>Price Reminder</h3>
+            <p>Set a target and InvestoPlay will notify you when the simulated price touches it.</p>
+            <div class="form-grid">
+              <div class="field"><label for="reminderStock">Stock</label><select id="reminderStock" data-draft="reminderStock">${stockOptions}</select></div>
+              <div class="field"><label for="reminderDirection">Trigger</label><select id="reminderDirection" data-draft="reminderDirection"><option value="above">Price goes above</option><option value="below">Price goes below</option></select></div>
+              <div class="field"><label for="reminderPrice">Target price</label><input id="reminderPrice" data-draft="reminderPrice" type="number" min="1" value="${rememberDraft("reminderPrice", Math.round(currentStock().price))}" /></div>
+              <button class="primary-btn" id="addReminderBtn">Set Reminder</button>
+            </div>
+            <div class="list-stack">
+              ${reminders.length ? reminders.map((r) => `<div class="list-item"><div>${escapeHtml(r.symbol)} ${r.direction} ${formatMoney(r.price)}<small>${r.done ? "Triggered" : "Waiting"}</small></div><button class="ghost-btn" data-del-reminder="${r.id}">Remove</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No reminders yet.</div>`}
+            </div>
+          </section>
+
+          <section class="tool-card">
+            <h3>FD Simulator</h3>
+            <p>Lock fake cash for a few market ticks and get fixed interest when it matures.</p>
+            <div class="form-grid">
+              <div class="field"><label for="fdAmount">Amount</label><input id="fdAmount" data-draft="fdAmount" type="number" min="100" value="${rememberDraft("fdAmount", mode === "pro" ? 10000 : 1000)}" /></div>
+              <div class="field"><label for="fdTicks">Duration</label><select id="fdTicks" data-draft="fdTicks"><option value="20">Short - 20 ticks</option><option value="40">Medium - 40 ticks</option><option value="70">Long - 70 ticks</option></select></div>
+              <button class="primary-btn" id="createFdBtn">Create FD</button>
+            </div>
+            <div class="list-stack">
+              ${fds.length ? fds.map((fd) => `<div class="list-item"><div>${formatMoney(fd.amount)}<small>Matures in ${Math.max(0, fd.endTick - state.tick)} ticks. Return: ${formatMoney(fd.maturity)}</small></div><span class="tag">FD</span></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No FDs yet.</div>`}
+            </div>
+          </section>
+
+          <section class="tool-card">
+            <h3>SIP Simulator</h3>
+            <p>Automatically invest fake cash into one stock every few ticks, like a tiny learning SIP.</p>
+            <div class="form-grid">
+              <div class="field"><label for="sipStock">Stock</label><select id="sipStock" data-draft="sipStock">${stockOptions}</select></div>
+              <div class="field"><label for="sipAmount">Amount each time</label><input id="sipAmount" data-draft="sipAmount" type="number" min="100" value="${rememberDraft("sipAmount", mode === "pro" ? 5000 : 500)}" /></div>
+              <div class="field"><label for="sipEvery">Frequency</label><select id="sipEvery" data-draft="sipEvery"><option value="10">Every 10 ticks</option><option value="20">Every 20 ticks</option><option value="30">Every 30 ticks</option></select></div>
+              <button class="primary-btn" id="createSipBtn">Start SIP</button>
+            </div>
+            <div class="list-stack">
+              ${sips.length ? sips.map((sip) => `<div class="list-item"><div>${escapeHtml(sip.symbol)} - ${formatMoney(sip.amount)}<small>Every ${sip.every} ticks. Next in ${Math.max(0, sip.nextTick - state.tick)} ticks.</small></div><button class="ghost-btn" data-stop-sip="${sip.id}">Stop</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No SIPs yet.</div>`}
+            </div>
+          </section>
+        </div>`;
+
+      bindDrafts(el.viewBody);
+      document.getElementById("addReminderBtn").addEventListener("click", addReminder);
+      document.getElementById("createFdBtn").addEventListener("click", createFd);
+      document.getElementById("createSipBtn").addEventListener("click", createSip);
+      el.viewBody.querySelectorAll("[data-del-reminder]").forEach((btn) => btn.addEventListener("click", () => removeReminder(btn.dataset.delReminder)));
+      el.viewBody.querySelectorAll("[data-stop-sip]").forEach((btn) => btn.addEventListener("click", () => stopSip(btn.dataset.stopSip)));
+    }
+
     function renderGoals() {
       el.viewTitle.textContent = "Goals";
       el.viewSubtitle.textContent = "Achievements and progress for the full game";
@@ -1521,10 +1833,121 @@
       return rivals.sort((a, b) => b.worth - a.worth);
     }
 
+    function makeId(prefix) {
+      return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+    }
+
+    function addReminder() {
+      const symbol = document.getElementById("reminderStock").value;
+      const direction = document.getElementById("reminderDirection").value;
+      const price = Math.max(1, Number(document.getElementById("reminderPrice").value) || 1);
+      state.reminders.push({ id: makeId("rem"), mode: state.mode, symbol, direction, price, done: false });
+      delete state.draftInputs.reminderPrice;
+      state.logs.push({ tick: state.tick, action: "REMINDER SET", symbol, qty: "-", price, total: null });
+      save();
+      gameFeel("start");
+      toast("Reminder set", `${symbol} will alert when it goes ${direction} ${formatMoney(price)}.`, "info");
+      renderTools();
+    }
+
+    function removeReminder(id) {
+      state.reminders = state.reminders.filter((r) => r.id !== id);
+      save();
+      renderTools();
+    }
+
+    function createFd() {
+      const amount = Math.max(100, Number(document.getElementById("fdAmount").value) || 0);
+      const ticks = Number(document.getElementById("fdTicks").value) || 20;
+      const wallet = state.wallets[state.mode];
+      if (wallet.cash < amount) {
+        gameFeel("bad");
+        toast("FD not created", "You do not have enough free cash.", "bad");
+        return;
+      }
+      const rate = ticks >= 70 ? 0.12 : ticks >= 40 ? 0.08 : 0.05;
+      const maturity = round(amount * (1 + rate));
+      wallet.cash = round(wallet.cash - amount);
+      state.fds.push({ id: makeId("fd"), mode: state.mode, amount, maturity, startTick: state.tick, endTick: state.tick + ticks, rate });
+      delete state.draftInputs.fdAmount;
+      state.logs.push({ tick: state.tick, action: "FD CREATED", symbol: "FD", qty: ticks, price: null, total: amount });
+      save();
+      gameFeel("start");
+      toast("FD created", `${formatMoney(amount)} locked. Maturity value: ${formatMoney(maturity)}.`, "good");
+      renderAll();
+    }
+
+    function createSip() {
+      const symbol = document.getElementById("sipStock").value;
+      const amount = Math.max(100, Number(document.getElementById("sipAmount").value) || 0);
+      const every = Number(document.getElementById("sipEvery").value) || 10;
+      state.sips.push({ id: makeId("sip"), mode: state.mode, symbol, amount, every, nextTick: state.tick + every });
+      delete state.draftInputs.sipAmount;
+      state.logs.push({ tick: state.tick, action: "SIP STARTED", symbol, qty: "-", price: null, total: amount });
+      save();
+      gameFeel("start");
+      toast("SIP started", `${formatMoney(amount)} will invest into ${symbol} every ${every} ticks.`, "good");
+      renderTools();
+    }
+
+    function stopSip(id) {
+      state.sips = state.sips.filter((sip) => sip.id !== id);
+      save();
+      toast("SIP stopped", "Automatic investing has been paused.", "info");
+      renderTools();
+    }
+
+    function buyForSip(sip) {
+      const stock = state.stocks[sip.symbol];
+      const wallet = state.wallets[sip.mode];
+      if (!stock || wallet.cash < sip.amount) return false;
+      const qty = Math.max(1, Math.floor(sip.amount / stock.price));
+      const total = round(qty * stock.price);
+      if (wallet.cash < total) return false;
+      const newQty = stock.owned + qty;
+      stock.avg = round(((stock.avg * stock.owned) + total) / newQty);
+      stock.owned = newQty;
+      stock.invested = round(stock.avg * stock.owned);
+      wallet.cash = round(wallet.cash - total);
+      state.logs.push({ tick: state.tick, action: "SIP BUY", symbol: stock.symbol, qty, price: stock.price, total });
+      return true;
+    }
+
+    function processMoneyTools() {
+      state.reminders.forEach((reminder) => {
+        if (reminder.done) return;
+        const stock = state.stocks[reminder.symbol];
+        if (!stock) return;
+        const hit = reminder.direction === "above" ? stock.price >= reminder.price : stock.price <= reminder.price;
+        if (!hit) return;
+        reminder.done = true;
+        state.logs.push({ tick: state.tick, action: "REMINDER HIT", symbol: stock.symbol, qty: "-", price: stock.price, total: null });
+        gameFeel("win");
+        toast("Price reminder", `${stock.symbol} is now ${formatMoney(stock.price)}.`, "info");
+      });
+
+      state.fds = state.fds.filter((fd) => {
+        if (state.tick < fd.endTick) return true;
+        state.wallets[fd.mode].cash = round(state.wallets[fd.mode].cash + fd.maturity);
+        state.logs.push({ tick: state.tick, action: "FD MATURED", symbol: "FD", qty: "-", price: null, total: fd.maturity });
+        gameFeel("win");
+        toast("FD matured", `${formatMoney(fd.maturity)} added to ${fd.mode} cash.`, "good");
+        return false;
+      });
+
+      state.sips.forEach((sip) => {
+        if (state.tick < sip.nextTick) return;
+        const bought = buyForSip(sip);
+        sip.nextTick = state.tick + sip.every;
+        if (bought) toast("SIP invested", `${formatMoney(sip.amount)} tried buying ${sip.symbol}.`, "good");
+      });
+    }
+
     function trade(action) {
       const stock = currentStock();
       const input = document.getElementById("qtyInput");
       const qty = Math.max(1, Math.floor(Number(input.value) || 1));
+      state.orderQty[stock.symbol] = qty;
       const wallet = state.wallets[stock.market];
       const total = round(qty * stock.price);
       if (action === "BUY") {
@@ -1577,6 +2000,7 @@
         if (stock.history.length > 90) stock.history.shift();
       });
 
+      processMoneyTools();
       if (state.tick % 30 === 0) payDividends();
       checkAchievements();
       renderAll();
@@ -1615,6 +2039,7 @@
       unlock("five_trades", state.logs.filter((l) => l.action === "BUY" || l.action === "SELL").length >= 5);
       unlock("profit_1k", totalPL("arcade") + totalPL("pro") >= 1000);
       unlock("diversified", Object.values(state.stocks).filter((s) => s.owned > 0).length >= 3);
+      unlock("planner", state.reminders.length + state.fds.length + state.sips.length > 0);
       unlock("arcade_goal", netWorth("arcade") >= goals.arcade);
       unlock("pro_goal", netWorth("pro") >= goals.pro);
     }
@@ -1697,6 +2122,7 @@
     function renderAll() {
       renderStats();
       renderNav();
+      if (document.activeElement && document.activeElement.matches("input, select")) return;
       renderView();
     }
 
@@ -1788,25 +2214,22 @@
       setViewTabs();
     }
 
-    el.openLoginBtn.addEventListener("click", () => {
-      el.homeModal.classList.add("hidden");
-      el.loginModal.classList.remove("hidden");
-      haptic(12);
-    });
+    el.openLoginBtn.addEventListener("click", openLoginPage);
+    el.ribbonLoginBtn.addEventListener("click", openLoginPage);
     el.quickPlayBtn.addEventListener("click", () => start("Guest"));
-    el.backHomeBtn.addEventListener("click", () => {
-      el.loginModal.classList.add("hidden");
-      el.homeModal.classList.remove("hidden");
-    });
+    el.loginGuestBtn.addEventListener("click", () => start("Guest"));
+    el.backHomeBtn.addEventListener("click", openHomePage);
     el.startBtn.addEventListener("click", () => start(el.playerName.value, el.playerPin.value));
     el.arcadeModeBtn.addEventListener("click", () => setMode("arcade"));
     el.proModeBtn.addEventListener("click", () => setMode("pro"));
     el.tradeViewBtn.addEventListener("click", () => setView("trade"));
     el.portfolioViewBtn.addEventListener("click", () => setView("portfolio"));
     el.logsViewBtn.addEventListener("click", () => setView("logs"));
+    el.toolsViewBtn.addEventListener("click", () => setView("tools"));
     el.goalsViewBtn.addEventListener("click", () => setView("goals"));
     el.themeBtn.addEventListener("click", cycleTheme);
     el.helpBtn.addEventListener("click", showGuide);
+    el.homeBtn.addEventListener("click", openHomePage);
     el.saveBtn.addEventListener("click", () => {
       save();
       gameFeel("start");
@@ -1823,8 +2246,9 @@
     if (hadSave) {
       el.playerName.value = state.player;
       el.playerPin.value = state.pin || "";
-      el.homeModal.classList.add("hidden");
+      el.homeModal.classList.remove("hidden");
       el.loginModal.classList.add("hidden");
+      el.appShell.classList.add("hidden");
     }
     renderAll();
     setInterval(tickMarket, 2600);
