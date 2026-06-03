@@ -1536,54 +1536,63 @@
       unlocked: {}
     };
 
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function on(target, event, handler) {
+      if (!target) return;
+      target.addEventListener(event, handler);
+    }
+
     const el = {
-      appShell: document.getElementById("appShell"),
-      homeModal: document.getElementById("homeModal"),
-      loginModal: document.getElementById("loginModal"),
-      playerName: document.getElementById("playerName"),
-      playerPin: document.getElementById("playerPin"),
-      openLoginBtn: document.getElementById("openLoginBtn"),
-      ribbonLoginBtn: document.getElementById("ribbonLoginBtn"),
-      quickPlayBtn: document.getElementById("quickPlayBtn"),
-      startBtn: document.getElementById("startBtn"),
-      loginGuestBtn: document.getElementById("loginGuestBtn"),
-      backHomeBtn: document.getElementById("backHomeBtn"),
-      playerLabel: document.getElementById("playerLabel"),
-      rankLabel: document.getElementById("rankLabel"),
-      levelLabel: document.getElementById("levelLabel"),
-      goalMeter: document.getElementById("goalMeter"),
-      navList: document.getElementById("navList"),
-      pulseEvent: document.getElementById("pulseEvent"),
-      pulseMover: document.getElementById("pulseMover"),
-      tradeCount: document.getElementById("tradeCount"),
-      cashLabel: document.getElementById("cashLabel"),
-      cashValue: document.getElementById("cashValue"),
-      netWorthValue: document.getElementById("netWorthValue"),
-      goalText: document.getElementById("goalText"),
-      plValue: document.getElementById("plValue"),
-      realizedValue: document.getElementById("realizedValue"),
-      viewTitle: document.getElementById("viewTitle"),
-      viewSubtitle: document.getElementById("viewSubtitle"),
-      viewBody: document.getElementById("viewBody"),
-      arcadeModeBtn: document.getElementById("arcadeModeBtn"),
-      proModeBtn: document.getElementById("proModeBtn"),
-      tradeViewBtn: document.getElementById("tradeViewBtn"),
-      portfolioViewBtn: document.getElementById("portfolioViewBtn"),
-      logsViewBtn: document.getElementById("logsViewBtn"),
-      toolsViewBtn: document.getElementById("toolsViewBtn"),
-      goalsViewBtn: document.getElementById("goalsViewBtn"),
-      themeBtn: document.getElementById("themeBtn"),
-      helpBtn: document.getElementById("helpBtn"),
-      homeBtn: document.getElementById("homeBtn"),
-      saveBtn: document.getElementById("saveBtn"),
-      resetBtn: document.getElementById("resetBtn"),
-      toastStack: document.getElementById("toastStack")
+      appShell: $("appShell"),
+      homeModal: $("homeModal"),
+      loginModal: $("loginModal"),
+      playerName: $("playerName"),
+      playerPin: $("playerPin"),
+      openLoginBtn: $("openLoginBtn"),
+      ribbonLoginBtn: $("ribbonLoginBtn"),
+      quickPlayBtn: $("quickPlayBtn"),
+      startBtn: $("startBtn"),
+      loginGuestBtn: $("loginGuestBtn"),
+      backHomeBtn: $("backHomeBtn"),
+      playerLabel: $("playerLabel"),
+      rankLabel: $("rankLabel"),
+      levelLabel: $("levelLabel"),
+      goalMeter: $("goalMeter"),
+      navList: $("navList"),
+      pulseEvent: $("pulseEvent"),
+      pulseMover: $("pulseMover"),
+      tradeCount: $("tradeCount"),
+      cashLabel: $("cashLabel"),
+      cashValue: $("cashValue"),
+      netWorthValue: $("netWorthValue"),
+      goalText: $("goalText"),
+      plValue: $("plValue"),
+      realizedValue: $("realizedValue"),
+      viewTitle: $("viewTitle"),
+      viewSubtitle: $("viewSubtitle"),
+      viewBody: $("viewBody"),
+      arcadeModeBtn: $("arcadeModeBtn"),
+      proModeBtn: $("proModeBtn"),
+      tradeViewBtn: $("tradeViewBtn"),
+      portfolioViewBtn: $("portfolioViewBtn"),
+      logsViewBtn: $("logsViewBtn"),
+      toolsViewBtn: $("toolsViewBtn"),
+      goalsViewBtn: $("goalsViewBtn"),
+      themeBtn: $("themeBtn"),
+      helpBtn: $("helpBtn"),
+      homeBtn: $("homeBtn"),
+      saveBtn: $("saveBtn"),
+      resetBtn: $("resetBtn"),
+      toastStack: $("toastStack")
     };
-    el.tutorialPop = document.getElementById("tutorialPop");
-    el.tutorialTitle = document.getElementById("tutorialTitle");
-    el.tutorialText = document.getElementById("tutorialText");
-    el.skipTutorialBtn = document.getElementById("skipTutorialBtn");
-    el.nextTutorialBtn = document.getElementById("nextTutorialBtn");
+    el.tutorialPop = $("tutorialPop");
+    el.tutorialTitle = $("tutorialTitle");
+    el.tutorialText = $("tutorialText");
+    el.skipTutorialBtn = $("skipTutorialBtn");
+    el.nextTutorialBtn = $("nextTutorialBtn");
 
     function makeStock(symbol, base, volatility, market, sector) {
       const hist = [];
@@ -1640,7 +1649,11 @@
       try {
         const saved = JSON.parse(raw);
         if (!saved || !saved.stocks || !saved.wallets) return false;
+        const freshStocks = state.stocks;
         Object.assign(state, saved);
+        Object.keys(freshStocks).forEach((symbol) => {
+          state.stocks[symbol] = { ...freshStocks[symbol], ...(saved.stocks[symbol] || {}) };
+        });
         state.reminders ||= [];
         state.autoSells ||= [];
         state.fds ||= [];
@@ -1679,32 +1692,42 @@
       location.reload();
     }
 
+    function showAppError(error) {
+      console.error(error);
+      const message = error && error.message ? error.message : String(error);
+      toast("App error", message, "bad");
+    }
+
     function start(player, pin = "") {
       state.player = (player || "Guest").trim().slice(0, 18) || "Guest";
       state.pin = String(pin || "").slice(0, 4);
-      el.homeModal.classList.add("hidden");
-      el.loginModal.classList.add("hidden");
-      el.appShell.classList.remove("hidden");
-      save();
-      renderAll();
-      claimDailyReward();
-      showTutorial();
-      gameFeel("start");
-      toast("Welcome", "Progress is saved locally for " + state.player + ".", "info");
+      if (el.homeModal) el.homeModal.classList.add("hidden");
+      if (el.loginModal) el.loginModal.classList.add("hidden");
+      if (el.appShell) el.appShell.classList.remove("hidden");
+      try {
+        save();
+        renderAll();
+        claimDailyReward();
+        showTutorial();
+        gameFeel("start");
+        toast("Welcome", "Progress is saved locally for " + state.player + ".", "info");
+      } catch (error) {
+        showAppError(error);
+      }
     }
 
     function openLoginPage() {
-      el.homeModal.classList.add("hidden");
-      el.loginModal.classList.remove("hidden");
-      el.appShell.classList.add("hidden");
+      if (el.homeModal) el.homeModal.classList.add("hidden");
+      if (el.loginModal) el.loginModal.classList.remove("hidden");
+      if (el.appShell) el.appShell.classList.add("hidden");
       haptic(12);
     }
 
     function openHomePage() {
       save();
-      el.loginModal.classList.add("hidden");
-      el.appShell.classList.add("hidden");
-      el.homeModal.classList.remove("hidden");
+      if (el.loginModal) el.loginModal.classList.add("hidden");
+      if (el.appShell) el.appShell.classList.add("hidden");
+      if (el.homeModal) el.homeModal.classList.remove("hidden");
       haptic(12);
     }
 
@@ -2542,7 +2565,6 @@
       learningTip("SIP");
       renderTools();
     }
-7:17 PM 6/3/2026
     function stopSip(id) {
       state.sips = state.sips.filter((sip) => sip.id !== id);
       save();
@@ -2912,47 +2934,57 @@
       save();
     }
 
-    el.openLoginBtn.addEventListener("click", openLoginPage);
-    el.ribbonLoginBtn.addEventListener("click", openLoginPage);
-    el.quickPlayBtn.addEventListener("click", () => start("Guest"));
-    el.loginGuestBtn.addEventListener("click", () => start("Guest"));
-    el.backHomeBtn.addEventListener("click", openHomePage);
-    el.startBtn.addEventListener("click", () => start(el.playerName.value, el.playerPin.value));
-    el.arcadeModeBtn.addEventListener("click", () => setMode("arcade"));
-    el.proModeBtn.addEventListener("click", () => setMode("pro"));
-    el.tradeViewBtn.addEventListener("click", () => setView("trade"));
-    el.portfolioViewBtn.addEventListener("click", () => setView("portfolio"));
-    el.logsViewBtn.addEventListener("click", () => setView("logs"));
-    el.toolsViewBtn.addEventListener("click", () => setView("tools"));
-    el.goalsViewBtn.addEventListener("click", () => setView("goals"));
-    el.themeBtn.addEventListener("click", cycleTheme);
-    el.helpBtn.addEventListener("click", showGuide);
-    el.skipTutorialBtn.addEventListener("click", skipTutorial);
-    el.nextTutorialBtn.addEventListener("click", nextTutorial);
-    el.homeBtn.addEventListener("click", openHomePage);
-    el.saveBtn.addEventListener("click", () => {
+    on(el.openLoginBtn, "click", openLoginPage);
+    on(el.ribbonLoginBtn, "click", openLoginPage);
+    on(el.quickPlayBtn, "click", () => start("Guest"));
+    on(el.loginGuestBtn, "click", () => start("Guest"));
+    on(el.backHomeBtn, "click", openHomePage);
+    on(el.startBtn, "click", () => start(el.playerName ? el.playerName.value : "Guest", el.playerPin ? el.playerPin.value : ""));
+    on(el.arcadeModeBtn, "click", () => setMode("arcade"));
+    on(el.proModeBtn, "click", () => setMode("pro"));
+    on(el.tradeViewBtn, "click", () => setView("trade"));
+    on(el.portfolioViewBtn, "click", () => setView("portfolio"));
+    on(el.logsViewBtn, "click", () => setView("logs"));
+    on(el.toolsViewBtn, "click", () => setView("tools"));
+    on(el.goalsViewBtn, "click", () => setView("goals"));
+    on(el.themeBtn, "click", cycleTheme);
+    on(el.helpBtn, "click", showGuide);
+    on(el.skipTutorialBtn, "click", skipTutorial);
+    on(el.nextTutorialBtn, "click", nextTutorial);
+    on(el.homeBtn, "click", openHomePage);
+    on(el.saveBtn, "click", () => {
       save();
       gameFeel("start");
       toast("Saved", "Your game is saved on this browser.", "good");
     });
-    el.resetBtn.addEventListener("click", resetGame);
-    window.addEventListener("resize", () => {
+    on(el.resetBtn, "click", resetGame);
+    on(window, "resize", () => {
       if (state.view === "trade") renderTrade();
     });
 
-    initStocks();
-    const hadSave = loadSave();
-    initRivals();
-    if (themes[state.themeIndex] !== "light") document.body.classList.add(themes[state.themeIndex]);
-    if (hadSave) {
-      el.playerName.value = state.player;
-      el.playerPin.value = state.pin || "";
-      el.homeModal.classList.remove("hidden");
-      el.loginModal.classList.add("hidden");
-      el.appShell.classList.add("hidden");
+    try {
+      initStocks();
+      const hadSave = loadSave();
+      initRivals();
+      if (themes[state.themeIndex] !== "light") document.body.classList.add(themes[state.themeIndex]);
+      if (hadSave) {
+        if (el.playerName) el.playerName.value = state.player;
+        if (el.playerPin) el.playerPin.value = state.pin || "";
+        if (el.homeModal) el.homeModal.classList.remove("hidden");
+        if (el.loginModal) el.loginModal.classList.add("hidden");
+        if (el.appShell) el.appShell.classList.add("hidden");
+      }
+      renderAll();
+      setInterval(() => {
+        try {
+          tickMarket();
+        } catch (error) {
+          showAppError(error);
+        }
+      }, 2600);
+    } catch (error) {
+      showAppError(error);
     }
-    renderAll();
-    setInterval(tickMarket, 2600);
   </script>
 </body>
 </html>
