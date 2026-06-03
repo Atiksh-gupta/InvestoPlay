@@ -799,6 +799,106 @@
       gap: 10px;
     }
 
+    .watchlist-strip {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .star-btn {
+      min-width: 34px;
+      min-height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--gold);
+      font-weight: 950;
+    }
+
+    .allocation-panel {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .pie-shell {
+      min-height: 300px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      padding: 12px;
+      cursor: grab;
+    }
+
+    .pie-shell:active {
+      cursor: grabbing;
+    }
+
+    .mission-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mission-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand), var(--gold));
+      transform: scaleX(var(--progress, 0));
+      transform-origin: left;
+      transition: transform 0.35s ease;
+    }
+
+    .rival-row {
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .rival-row:hover {
+      transform: translateX(3px);
+      background: color-mix(in srgb, var(--brand) 9%, transparent);
+    }
+
+    .hacker-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.88);
+      color: #22c55e;
+      font-family: var(--mono);
+      animation: hackFade 0.25s ease;
+    }
+
+    .hacker-card {
+      width: min(760px, 100%);
+      border: 1px solid rgba(34, 197, 94, 0.65);
+      border-radius: 8px;
+      background: rgba(2, 6, 23, 0.92);
+      padding: 22px;
+      box-shadow: 0 0 40px rgba(34, 197, 94, 0.22);
+    }
+
+    .hacker-card h2 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 5vw, 52px);
+    }
+
+    .hacker-card p {
+      margin: 0 0 16px;
+      color: #bbf7d0;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    @keyframes hackFade {
+      from { opacity: 0; filter: blur(4px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+
     .toast-stack {
       position: fixed;
       top: 78px;
@@ -819,6 +919,21 @@
       box-shadow: var(--shadow);
       font-weight: 850;
       animation: toastIn 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toast::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: currentColor;
+      opacity: 0.35;
+      animation: toastTimer 3.6s linear forwards;
+      transform-origin: left;
     }
 
     .toast.good {
@@ -847,6 +962,11 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    @keyframes toastTimer {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
     }
 
     .spark {
@@ -1072,6 +1192,7 @@
       .trade-layout,
       .grid-2,
       .tool-grid,
+      .allocation-panel,
       .home-page {
         grid-template-columns: 1fr;
       }
@@ -1403,6 +1524,12 @@
       autoSells: [],
       fds: [],
       sips: [],
+      watchlist: ["TechNova", "RELIANCE"],
+      rivals: [],
+      missions: {},
+      prediction: null,
+      predictionHistory: [],
+      pieRotation: 0,
       orderQty: {},
       draftInputs: {},
       logs: [],
@@ -1497,6 +1624,16 @@
       });
     }
 
+    function initRivals() {
+      if (state.rivals.length) return;
+      state.rivals = [
+        { name: "MarketWizard", worth: 11200, style: "steady", mood: 1 },
+        { name: "PixelBull", worth: 9800, style: "spike", mood: 1 },
+        { name: "RiskRunner", worth: 10400, style: "wild", mood: -1 },
+        { name: "ChartChamp", worth: 10650, style: "cycle", mood: 1 }
+      ];
+    }
+
     function loadSave() {
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return false;
@@ -1508,6 +1645,12 @@
         state.autoSells ||= [];
         state.fds ||= [];
         state.sips ||= [];
+        state.watchlist ||= ["TechNova", "RELIANCE"];
+        state.rivals ||= [];
+        state.missions ||= {};
+        state.prediction ||= null;
+        state.predictionHistory ||= [];
+        state.pieRotation ||= 0;
         state.orderQty ||= {};
         state.draftInputs ||= {};
         state.daily ||= { lastDate: "", streak: 0 };
@@ -1691,6 +1834,53 @@
       save();
     }
 
+    function toggleWatch(symbol) {
+      if (state.watchlist.includes(symbol)) {
+        state.watchlist = state.watchlist.filter((s) => s !== symbol);
+        toast("Removed from watchlist", symbol, "info");
+      } else {
+        state.watchlist.push(symbol);
+        toast("Added to watchlist", symbol, "good");
+      }
+      save();
+      updateMissions();
+      renderAll();
+    }
+
+    function missionList() {
+      const trades = state.logs.filter((l) => ["BUY", "SELL", "AUTO SELL", "SIP BUY"].includes(l.action)).length;
+      return [
+        { id: "watch_3", title: "Build A Watchlist", desc: "Add 3 stocks to your watchlist.", now: state.watchlist.length, goal: 3 },
+        { id: "trade_3", title: "Make 3 Trades", desc: "Buy, sell, auto-sell, or SIP buy 3 times.", now: trades, goal: 3 },
+        { id: "planner_1", title: "Use A Smart Tool", desc: "Create a reminder, auto-sell, FD, or SIP.", now: state.reminders.length + state.autoSells.length + state.fds.length + state.sips.length, goal: 1 },
+        { id: "profit_500", title: "Earn Profit", desc: "Reach Rs. 500 total profit.", now: Math.max(0, totalPL("arcade") + totalPL("pro")), goal: 500 }
+      ];
+    }
+
+    function updateMissions() {
+      missionList().forEach((mission) => {
+        if (state.missions[mission.id]) return;
+        if (mission.now >= mission.goal) {
+          state.missions[mission.id] = true;
+          state.wallets.arcade.cash = round(state.wallets.arcade.cash + 300);
+          state.logs.push({ tick: state.tick, action: "DAILY REWARD", symbol: mission.title, qty: "-", price: null, total: 300 });
+          gameFeel("win");
+          toast("Mission complete", `${mission.title}: Rs. 300 bonus added.`, "good");
+        }
+      });
+    }
+
+    function learningTip(kind) {
+      const tips = {
+        BUY: "Tip: buying more changes your average buy price.",
+        SELL: "Tip: selling locks profit or loss into Sold Profit.",
+        FD: "Tip: FDs count in net worth, but the cash is locked until maturity.",
+        SIP: "Tip: SIPs buy regularly, so timing matters less.",
+        AUTO: "Tip: Auto Sell is useful for profit targets and stop-loss style plans."
+      };
+      if (tips[kind]) toast("Learning tip", tips[kind], "info");
+    }
+
     function rememberDraft(id, fallback = "") {
       return state.draftInputs[id] ?? fallback;
     }
@@ -1716,6 +1906,16 @@
       html += navButton("Transaction Log", "logs", "logs");
       html += navButton("Money Tools", "tools", "tools");
       html += navButton("Goals", "goals", "goals");
+      if (state.watchlist.length) {
+        html += `<div class="nav-group-title">Watchlist</div><div class="watchlist-strip">`;
+        state.watchlist.forEach((symbol) => {
+          const s = state.stocks[symbol];
+          if (!s) return;
+          const active = state.view === "trade" && state.selected === symbol ? " active" : "";
+          html += `<button class="nav-item${active}" data-stock="${symbol}"><span>${escapeHtml(symbol)}</span><span class="mini-price">${formatCompact(s.price)}</span></button>`;
+        });
+        html += `</div>`;
+      }
       Object.entries(sectors).forEach(([market, groups]) => {
         Object.entries(groups).forEach(([sector, rows]) => {
           html += `<div class="nav-group-title">${escapeHtml(market === "pro" ? sector + " [PRO]" : sector)}</div>`;
@@ -1793,6 +1993,19 @@
       }[pattern] || "Steady";
     }
 
+    function patternBias(stock) {
+      stock.phase = (stock.phase || 0) + 0.18;
+      if (stock.pattern === "steady") return 0.0015;
+      if (stock.pattern === "trend") return stock.momentum * 0.35;
+      if (stock.pattern === "spike") return Math.random() > 0.92 ? (Math.random() > 0.5 ? 0.12 : -0.1) : 0;
+      if (stock.pattern === "cycle") return Math.sin(stock.phase) * 0.012;
+      if (stock.pattern === "mean") {
+        const avg = stock.history.reduce((sum, value) => sum + value, 0) / stock.history.length;
+        return ((avg - stock.price) / Math.max(1, stock.price)) * 0.08;
+      }
+      return 0;
+    }
+
     function renderView() {
       setViewTabs();
       if (state.view === "portfolio") return renderPortfolio();
@@ -1818,6 +2031,7 @@
       const stockPL = stock.owned * stock.price - costBasis;
       const qtyKey = `qty-${stock.symbol}`;
       const savedQty = Math.min(400, Math.max(1, Math.floor(Number(rememberDraft(qtyKey, state.orderQty[stock.symbol] || 1)) || 1)));
+      const watched = state.watchlist.includes(stock.symbol);
       el.viewTitle.textContent = stock.symbol;
       el.viewSubtitle.textContent = `${stock.sector} stock in ${stock.market === "pro" ? "simulated Pro" : "Arcade"} market`;
 
@@ -1828,7 +2042,10 @@
           </section>
           <section class="order-panel">
             <div>
-              <div class="panel-title">Live Price</div>
+              <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                <div class="panel-title">Live Price</div>
+                <button class="star-btn" id="watchBtn" title="Toggle watchlist">${watched ? "★" : "☆"}</button>
+              </div>
               <div class="price-now ${change >= 0 ? "good-text" : "bad-text"}">${formatMoney(stock.price)}</div>
               <div class="tag-row">
                 <span class="tag ${change >= 0 ? "good" : "bad"}">${change >= 0 ? "+" : ""}${formatMoney(change)}</span>
@@ -1868,6 +2085,7 @@
         </div>`;
 
       drawChart(document.getElementById("priceCanvas"), stock);
+      document.getElementById("watchBtn").addEventListener("click", () => toggleWatch(stock.symbol));
       bindDrafts(el.viewBody);
       document.getElementById("qtyInput").addEventListener("input", (event) => {
         state.orderQty[stock.symbol] = Math.min(400, Math.max(1, Math.floor(Number(event.target.value) || 1)));
@@ -1894,11 +2112,28 @@
       el.viewTitle.textContent = "Portfolio";
       el.viewSubtitle.textContent = "The stocks you own and whether they are winning or losing";
       const rows = Object.values(state.stocks).filter((s) => s.owned > 0);
+      const allocationRows = allocationData(state.mode);
+      const allocationHtml = `
+        <div class="allocation-panel">
+          <div class="pie-shell" id="pieShell">
+            <canvas id="allocationCanvas"></canvas>
+          </div>
+          <div class="tool-card">
+            <h3>Allocation</h3>
+            <p>Drag the chart to rotate it. It includes cash, stocks, and FD value.</p>
+            <div class="list-stack">
+              ${allocationRows.map((item) => `<div class="list-item"><div>${escapeHtml(item.label)}<small>${item.kind}</small></div><strong class="money">${formatMoney(item.value)}</strong></div>`).join("")}
+            </div>
+          </div>
+        </div>`;
       if (!rows.length) {
-        el.viewBody.innerHTML = `<div class="empty-state">No positions yet. Buy a stock to build your portfolio.</div>`;
+        el.viewBody.innerHTML = allocationHtml + `<div class="empty-state">No stock positions yet. Buy a stock to build your portfolio.</div>`;
+        drawAllocationPie();
+        bindPieDrag();
         return;
       }
       el.viewBody.innerHTML = `
+        ${allocationHtml}
         <div class="table-wrap">
           <table>
             <thead>
@@ -1924,6 +2159,99 @@
             </tbody>
           </table>
         </div>`;
+      drawAllocationPie();
+      bindPieDrag();
+    }
+
+    function allocationData(mode = state.mode) {
+      const data = [];
+      const cash = state.wallets[mode].cash;
+      if (cash > 0) data.push({ label: "Cash", value: cash, kind: "Free cash" });
+      const fds = fdValue(mode);
+      if (fds > 0) data.push({ label: "FDs", value: fds, kind: "Locked value" });
+      marketStocks(mode).forEach((stock) => {
+        const value = stock.owned * stock.price;
+        if (value > 0) data.push({ label: stock.symbol, value, kind: "Stock" });
+      });
+      return data.length ? data : [{ label: "Empty", value: 1, kind: "No allocation yet" }];
+    }
+
+    function drawAllocationPie() {
+      const canvas = document.getElementById("allocationCanvas");
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const size = Math.max(260, Math.min(rect.width || 320, 360));
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(size * dpr);
+      canvas.height = Math.floor(size * dpr);
+      canvas.style.height = size + "px";
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+      const cx = size / 2;
+      const cy = size / 2 - 8;
+      const rx = size * 0.34;
+      const ry = size * 0.22;
+      const depth = 28;
+      const data = allocationData(state.mode);
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      const colors = ["#0ea5e9", "#f59e0b", "#22c55e", "#8b5cf6", "#ef4444", "#14b8a6", "#f97316", "#ec4899"];
+      let angle = state.pieRotation;
+      ctx.clearRect(0, 0, size, size);
+
+      data.forEach((item, index) => {
+        const slice = (item.value / total) * Math.PI * 2;
+        drawPieSlice(ctx, cx, cy + depth, rx, ry, angle, angle + slice, shade(colors[index % colors.length], -35));
+        angle += slice;
+      });
+
+      angle = state.pieRotation;
+      data.forEach((item, index) => {
+        const slice = (item.value / total) * Math.PI * 2;
+        drawPieSlice(ctx, cx, cy, rx, ry, angle, angle + slice, colors[index % colors.length]);
+        angle += slice;
+      });
+    }
+
+    function drawPieSlice(ctx, cx, cy, rx, ry, start, end, color) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      for (let a = start; a <= end; a += 0.04) ctx.lineTo(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry);
+      ctx.lineTo(cx + Math.cos(end) * rx, cy + Math.sin(end) * ry);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.stroke();
+    }
+
+    function shade(hex, amount) {
+      const num = parseInt(hex.slice(1), 16);
+      const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+      const g = Math.max(0, Math.min(255, ((num >> 8) & 255) + amount));
+      const b = Math.max(0, Math.min(255, (num & 255) + amount));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function bindPieDrag() {
+      const shell = document.getElementById("pieShell");
+      if (!shell) return;
+      let dragging = false;
+      let lastX = 0;
+      shell.addEventListener("pointerdown", (event) => {
+        dragging = true;
+        lastX = event.clientX;
+        shell.setPointerCapture(event.pointerId);
+      });
+      shell.addEventListener("pointermove", (event) => {
+        if (!dragging) return;
+        state.pieRotation += (event.clientX - lastX) * 0.015;
+        lastX = event.clientX;
+        drawAllocationPie();
+      });
+      shell.addEventListener("pointerup", () => {
+        dragging = false;
+        save();
+      });
     }
 
     function renderLogs() {
@@ -2035,19 +2363,34 @@
     function renderGoals() {
       el.viewTitle.textContent = "Goals";
       el.viewSubtitle.textContent = "Achievements and progress for the full game";
-      const rows = achievements.map(([id, title, desc]) => `
-        <div class="achievement ${state.unlocked[id] ? "done" : ""}">
+      const missions = missionList().map((mission) => {
+        const done = state.missions[mission.id] || mission.now >= mission.goal;
+        const progress = Math.max(0, Math.min(1, mission.now / mission.goal));
+        return `
+        <div class="achievement mission-card ${done ? "done" : ""}" style="--progress:${progress}">
+          <div><strong>${mission.title}</strong><small>${mission.desc}</small></div>
+          <strong>${Math.min(mission.now, mission.goal)}/${mission.goal}</strong>
+        </div>`;
+      }).join("");
+      const rows = achievements.map(([id, title, desc, icon]) => `
+        <div class="achievement badge-card ${state.unlocked[id] ? "done" : ""}">
+          <div class="badge-icon">${escapeHtml(icon || "IP")}</div>
           <div><strong>${title}</strong><small>${desc}</small></div>
-          <strong>${state.unlocked[id] ? "DONE" : "LOCKED"}</strong>
+          <strong>${state.unlocked[id] ? "EARNED" : "LOCKED"}</strong>
         </div>`).join("");
       const leaderboard = buildLeaderboard().map((row, index) => `
-        <tr><td>${index + 1}</td><td>${escapeHtml(row.name)}</td><td class="money">${formatMoney(row.worth)}</td></tr>`).join("");
+        <tr class="rival-row"><td>${index + 1}</td><td>${escapeHtml(row.name)}</td><td>${row.change >= 0 ? "+" : ""}${formatMoney(row.change || 0)}</td><td class="money">${formatMoney(row.worth)}</td></tr>`).join("");
       el.viewBody.innerHTML = `
         <div class="grid-2">
-          <section>${rows}</section>
+          <section>
+            <h3 class="panel-title" style="margin-bottom:10px;">Daily Missions</h3>
+            ${missions}
+            <h3 class="panel-title" style="margin:18px 0 10px;">Badges</h3>
+            ${rows}
+          </section>
           <section class="table-wrap">
             <table>
-              <thead><tr><th>#</th><th>Player</th><th>Net Worth</th></tr></thead>
+              <thead><tr><th>#</th><th>Player</th><th>Last Move</th><th>Net Worth</th></tr></thead>
               <tbody>${leaderboard}</tbody>
             </table>
           </section>
@@ -2055,11 +2398,70 @@
     }
 
     function buildLeaderboard() {
-      const base = netWorth(state.mode);
-      const names = ["MarketWizard", "PixelBull", "RiskRunner", "ChartChamp"];
-      const rivals = names.map((name, i) => ({ name, worth: base * (0.82 + i * 0.09 + Math.random() * 0.05) }));
-      rivals.push({ name: state.player, worth: base });
+      const rivals = state.rivals.map((r) => ({ ...r }));
+      rivals.push({ name: state.player, worth: netWorth(state.mode), change: unrealizedPL(state.mode) });
       return rivals.sort((a, b) => b.worth - a.worth);
+    }
+
+    function updateRivals() {
+      state.rivals.forEach((rival, index) => {
+        const wave = Math.sin((state.tick + index * 7) / (rival.style === "cycle" ? 5 : 9));
+        const random = (Math.random() - 0.48) * (rival.style === "wild" || rival.style === "spike" ? 0.035 : 0.014);
+        const stylePush = rival.style === "steady" ? 0.003 : rival.style === "spike" ? (Math.random() > 0.82 ? 0.08 : -0.006) : wave * 0.012;
+        const change = round(rival.worth * (random + stylePush));
+        rival.change = change;
+        rival.worth = Math.max(1000, round(rival.worth + change));
+      });
+    }
+
+    function maybeStartPrediction() {
+      if (state.prediction || state.tick < 12 || state.tick % 45 !== 0) return;
+      const candidates = marketStocks(state.mode);
+      const stock = candidates[Math.floor(Math.random() * candidates.length)];
+      const accurate = Math.random() < 0.75;
+      state.prediction = {
+        symbol: stock.symbol,
+        dueTick: state.tick + 10,
+        accurate,
+        startPrice: stock.price
+      };
+      showHackerPrediction(state.prediction);
+    }
+
+    function showHackerPrediction(prediction) {
+      const overlay = document.createElement("div");
+      overlay.className = "hacker-overlay";
+      overlay.innerHTML = `
+        <div class="hacker-card">
+          <h2>MARKET SIGNAL</h2>
+          <p>Anonymous tip: ${escapeHtml(prediction.symbol)} may rise heavily in about 10 ticks. Accuracy is not guaranteed.</p>
+          <button class="primary-btn" id="closeHackerBtn">Close Signal</button>
+        </div>`;
+      document.body.appendChild(overlay);
+      haptic([20, 40, 20]);
+      document.getElementById("closeHackerBtn").addEventListener("click", () => overlay.remove());
+      setTimeout(() => overlay.remove(), 7000);
+    }
+
+    function processPrediction() {
+      maybeStartPrediction();
+      if (!state.prediction || state.tick < state.prediction.dueTick) return;
+      const stock = state.stocks[state.prediction.symbol];
+      if (!stock) {
+        state.prediction = null;
+        return;
+      }
+      stock.previous = stock.price;
+      const boost = state.prediction.accurate ? 0.16 + Math.random() * 0.1 : -(0.07 + Math.random() * 0.08);
+      stock.price = round(Math.max(3, stock.price * (1 + boost)));
+      stock.high = Math.max(stock.high, stock.price);
+      stock.low = Math.min(stock.low, stock.price);
+      stock.history.push(stock.price);
+      if (stock.history.length > 90) stock.history.shift();
+      state.predictionHistory.push({ ...state.prediction, endPrice: stock.price, tick: state.tick });
+      state.lastEvent = `${stock.symbol}: prediction ${state.prediction.accurate ? "hit" : "failed"}`;
+      toast("Prediction result", `${stock.symbol} ${state.prediction.accurate ? "jumped" : "did not follow the signal"}.`, state.prediction.accurate ? "good" : "bad");
+      state.prediction = null;
     }
 
     function makeId(prefix) {
@@ -2095,6 +2497,7 @@
       save();
       gameFeel("start");
       toast("Auto sell set", `${symbol} will sell ${qty} units when it goes ${direction} ${formatMoney(price)}.`, "info");
+      learningTip("AUTO");
       renderTools();
     }
 
@@ -2122,6 +2525,7 @@
       save();
       gameFeel("start");
       toast("FD created", `${formatMoney(amount)} locked. Maturity value: ${formatMoney(maturity)}.`, "good");
+      learningTip("FD");
       renderAll();
     }
 
@@ -2135,9 +2539,10 @@
       save();
       gameFeel("start");
       toast("SIP started", `${formatMoney(amount)} will invest into ${symbol} every ${every} ticks.`, "good");
+      learningTip("SIP");
       renderTools();
     }
-
+7:17 PM 6/3/2026
     function stopSip(id) {
       state.sips = state.sips.filter((sip) => sip.id !== id);
       save();
@@ -2260,18 +2665,20 @@
       save();
       gameFeel(action === "SELL" ? "sell" : "buy");
       toast(`${action} ${qty} ${stock.symbol} for ${formatMoney(total)}.`, action === "BUY" ? "good" : "info");
+      learningTip(action);
     }
 
     function tickMarket() {
       state.tick += 1;
       let event = null;
       if (state.tick % 20 === 0) event = createNewsEvent();
+      if (state.tick % 5 === 0) updateRivals();
 
       Object.values(state.stocks).forEach((stock) => {
         stock.previous = stock.price;
         const drift = stock.momentum * 0.22;
-        const eventBoost = event && (event.market === stock.market || event.sector === stock.sector) ? event.impact : 0;
-        const change = randomNormal() * stock.volatility + drift + eventBoost;
+        const eventBoost = event && (event.symbol === stock.symbol || event.market === stock.market || event.sector === stock.sector) ? event.impact : 0;
+        const change = randomNormal() * stock.volatility + drift + eventBoost + patternBias(stock);
         stock.momentum = stock.momentum * 0.8 + change * 0.2;
         stock.price = round(Math.max(3, stock.price * (1 + change)));
         stock.high = Math.max(stock.high, stock.price);
@@ -2281,6 +2688,8 @@
       });
 
       processMoneyTools();
+      processPrediction();
+      updateMissions();
       if (state.tick % 30 === 0) payDividends();
       checkAchievements();
       renderAll();
@@ -2288,15 +2697,19 @@
     }
 
     function createNewsEvent() {
-      const allSectors = Object.values(state.stocks).map((s) => s.sector);
-      const sector = allSectors[Math.floor(Math.random() * allSectors.length)];
+      const allStocks = Object.values(state.stocks);
+      const allSectors = allStocks.map((s) => s.sector);
+      const targetStock = allStocks[Math.floor(Math.random() * allStocks.length)];
       const positive = Math.random() > 0.45;
-      const impact = (positive ? 1 : -1) * (0.008 + Math.random() * 0.016);
+      const crazy = Math.random() > 0.65;
+      const sector = targetStock.sector || allSectors[Math.floor(Math.random() * allSectors.length)];
+      const impact = (positive ? 1 : -1) * (crazy ? 0.07 + Math.random() * 0.12 : 0.008 + Math.random() * 0.016);
       const event = {
+        symbol: crazy ? targetStock.symbol : null,
         sector,
         market: Math.random() > 0.55 ? state.mode : null,
         impact,
-        text: `${sector}: ${positive ? "bullish news" : "pressure wave"}`
+        text: crazy ? `${targetStock.symbol}: ${positive ? "goes wild upward" : "gets hit hard"}` : `${sector}: ${positive ? "bullish news" : "pressure wave"}`
       };
       state.lastEvent = event.text;
       toast(event.text, positive ? "good" : "bad");
@@ -2529,6 +2942,7 @@
 
     initStocks();
     const hadSave = loadSave();
+    initRivals();
     if (themes[state.themeIndex] !== "light") document.body.classList.add(themes[state.themeIndex]);
     if (hadSave) {
       el.playerName.value = state.player;
