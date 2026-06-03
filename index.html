@@ -729,6 +729,76 @@
       border-color: color-mix(in srgb, var(--good) 60%, var(--line));
     }
 
+    .badge-card {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #101010;
+      background: linear-gradient(135deg, var(--gold), #fef08a);
+      font-weight: 950;
+      box-shadow: 0 10px 24px rgba(245, 158, 11, 0.22);
+    }
+
+    .company-card {
+      margin-top: 14px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .company-card h3 {
+      margin: 0 0 7px;
+      font-size: 16px;
+    }
+
+    .company-card p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .tutorial-pop {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      width: min(520px, calc(100vw - 28px));
+      z-index: 120;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .tutorial-pop h3 {
+      margin: 0 0 6px;
+    }
+
+    .tutorial-pop p {
+      margin: 0 0 13px;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .tutorial-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .toast-stack {
       position: fixed;
       top: 78px;
@@ -1053,6 +1123,14 @@
 </head>
 <body class="dark">
   <div class="toast-stack" id="toastStack"></div>
+  <div class="tutorial-pop hidden" id="tutorialPop">
+    <h3 id="tutorialTitle">Welcome</h3>
+    <p id="tutorialText">This short guide shows the main controls.</p>
+    <div class="tutorial-actions">
+      <button class="ghost-btn" id="skipTutorialBtn">Skip</button>
+      <button class="primary-btn" id="nextTutorialBtn">Next</button>
+    </div>
+  </div>
 
   <section class="modal-backdrop page-screen" id="homeModal">
     <div class="home-page">
@@ -1170,7 +1248,7 @@
           <div class="stat">
             <label>Net Worth</label>
             <strong id="netWorthValue">Rs. 10,000.00</strong>
-            <small id="goalText">Goal: Rs. 25,000</small>
+            <small id="goalText">Cash + stocks + FD value</small>
           </div>
           <div class="stat">
             <label>Current Profit</label>
@@ -1216,12 +1294,43 @@
         <p>InvestoPlay saves your player locally, tracks cash, stocks owned, simple profit, goals, rewards, and surprise news events.</p>
       </section>
     </div>
+    <div style="margin-top: 16px;">
+      <button class="primary-btn" id="closeGuideBtn">Close Guide</button>
+    </div>
   </template>
 
   <script>
     const STORE_KEY = "investoplay-save-v2";
     const themes = ["dark", "arcade", "light"];
     const goals = { arcade: 25000, pro: 350000 };
+    const stockProfiles = {
+      TechNova: ["Medium", "trend", "AI hardware startup. It usually moves in strong waves when tech news is hot."],
+      CryptoWave: ["High", "spike", "Digital token exchange. It can jump or crash quickly, so it rewards brave timing."],
+      RoboWorks: ["Medium", "mean", "Automation company. It often snaps back after moving too far."],
+      GameX: ["High", "cycle", "Game studio. Its price rises and falls in hype cycles."],
+      GreenEnergy: ["Low", "steady", "Solar and wind company. Slower movement, but calmer for beginners."],
+      AquaTech: ["Low", "mean", "Water-tech company. It tends to return toward a fair price."],
+      FoodiesHub: ["Low", "steady", "Food delivery brand. Smaller moves, steady learning stock."],
+      FashionFi: ["Medium", "cycle", "Fashion marketplace. Trendy, seasonal, and sometimes surprising."],
+      EduGrow: ["Low", "steady", "Learning platform. A smoother stock for practice."],
+      AeroMax: ["Medium", "trend", "Aircraft maker. It can trend for several ticks after good or bad news."],
+      SpaceXp: ["High", "spike", "Space launch company. Big rocket-like bursts, both up and down."],
+      HealthFirst: ["Low", "steady", "Healthcare chain. Defensive and calmer than most stocks."],
+      BuildPro: ["Medium", "cycle", "Construction supplier. Moves with infrastructure cycles."],
+      AutoDrive: ["Medium", "trend", "Electric vehicle brand. Momentum can carry it for a while."],
+      RELIANCE: ["Medium", "trend", "Large diversified market simulator stock."],
+      ZOMATO: ["High", "spike", "Fast-moving consumer tech simulator stock."],
+      HDFCBANK: ["Low", "steady", "Banking simulator stock with smaller price swings."],
+      TATAMOTORS: ["Medium", "cycle", "Auto simulator stock with demand cycles."],
+      SBIN: ["Medium", "mean", "Banking simulator stock that often reverses sharp moves."],
+      ITC: ["Low", "steady", "Defensive simulator stock with calmer movement."]
+    };
+    const tutorialSteps = [
+      ["Pick A Stock", "Use the left list to choose a stock. Each one has its own risk and price pattern."],
+      ["Buy And Sell", "Type a quantity, then use Buy or Sell. Your typed number will not reset while prices update."],
+      ["Use Tools", "Money Tools has reminders, auto-sell, FDs, and SIPs like a professional trading app."],
+      ["Track Progress", "Goals shows badges, streak rewards, and your learning milestones."]
+    ];
 
     const sectors = {
       arcade: {
@@ -1263,13 +1372,14 @@
     };
 
     const achievements = [
-      ["first_trade", "First Trade", "Buy or sell once."],
-      ["five_trades", "Market Mover", "Complete 5 trades."],
-      ["profit_1k", "Profit Spark", "Reach Rs. 1,000 total P/L."],
-      ["diversified", "Diversified", "Hold 3 different stocks."],
-      ["planner", "Smart Planner", "Create a reminder, FD, or SIP."],
-      ["arcade_goal", "Arcade Winner", "Reach the Arcade net worth goal."],
-      ["pro_goal", "Pro Winner", "Reach the Pro net worth goal."]
+      ["first_trade", "First Trade", "Buy or sell once.", "BT"],
+      ["five_trades", "Market Mover", "Complete 5 trades.", "MM"],
+      ["profit_1k", "Profit Spark", "Reach Rs. 1,000 total P/L.", "PS"],
+      ["diversified", "Diversified", "Hold 3 different stocks.", "DV"],
+      ["planner", "Smart Planner", "Create a reminder, FD, SIP, or auto-sell.", "SP"],
+      ["streak_3", "Streak Builder", "Claim rewards for 3 days.", "3D"],
+      ["arcade_goal", "Arcade Winner", "Reach the Arcade net worth goal.", "AW"],
+      ["pro_goal", "Pro Winner", "Reach the Pro net worth goal.", "PW"]
     ];
 
     const state = {
@@ -1281,12 +1391,16 @@
       view: "trade",
       tick: 0,
       lastEvent: "Calm market",
+      tutorialStep: 0,
+      tutorialSkipped: false,
+      daily: { lastDate: "", streak: 0 },
       wallets: {
         arcade: { cash: 10000, realized: 0 },
         pro: { cash: 200000, realized: 0 }
       },
       stocks: {},
       reminders: [],
+      autoSells: [],
       fds: [],
       sips: [],
       orderQty: {},
@@ -1338,9 +1452,15 @@
       resetBtn: document.getElementById("resetBtn"),
       toastStack: document.getElementById("toastStack")
     };
+    el.tutorialPop = document.getElementById("tutorialPop");
+    el.tutorialTitle = document.getElementById("tutorialTitle");
+    el.tutorialText = document.getElementById("tutorialText");
+    el.skipTutorialBtn = document.getElementById("skipTutorialBtn");
+    el.nextTutorialBtn = document.getElementById("nextTutorialBtn");
 
     function makeStock(symbol, base, volatility, market, sector) {
       const hist = [];
+      const [risk, pattern, description] = stockProfiles[symbol] || ["Medium", "steady", "Simulated company."];
       let price = base * (0.88 + Math.random() * 0.24);
       for (let i = 0; i < 55; i += 1) {
         price = Math.max(5, price * (1 + randomNormal() * volatility));
@@ -1359,7 +1479,11 @@
         invested: 0,
         high: Math.max(...hist),
         low: Math.min(...hist),
-        history: hist
+        history: hist,
+        risk,
+        pattern,
+        description,
+        phase: Math.random() * Math.PI * 2
       };
     }
 
@@ -1381,10 +1505,21 @@
         if (!saved || !saved.stocks || !saved.wallets) return false;
         Object.assign(state, saved);
         state.reminders ||= [];
+        state.autoSells ||= [];
         state.fds ||= [];
         state.sips ||= [];
         state.orderQty ||= {};
         state.draftInputs ||= {};
+        state.daily ||= { lastDate: "", streak: 0 };
+        state.tutorialStep ||= 0;
+        state.tutorialSkipped ||= false;
+        Object.values(state.stocks).forEach((stock) => {
+          const profile = stockProfiles[stock.symbol] || ["Medium", "steady", "Simulated company."];
+          stock.risk ||= profile[0];
+          stock.pattern ||= profile[1];
+          stock.description ||= profile[2];
+          stock.phase ||= Math.random() * Math.PI * 2;
+        });
         return true;
       } catch {
         return false;
@@ -1409,6 +1544,8 @@
       el.appShell.classList.remove("hidden");
       save();
       renderAll();
+      claimDailyReward();
+      showTutorial();
       gameFeel("start");
       toast("Welcome", "Progress is saved locally for " + state.player + ".", "info");
     }
@@ -1426,6 +1563,58 @@
       el.appShell.classList.add("hidden");
       el.homeModal.classList.remove("hidden");
       haptic(12);
+    }
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function isYesterday(dateKey) {
+      if (!dateKey) return false;
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      return yesterday.toISOString().slice(0, 10) === dateKey;
+    }
+
+    function claimDailyReward() {
+      const today = todayKey();
+      if (state.daily.lastDate === today) return;
+      state.daily.streak = isYesterday(state.daily.lastDate) ? state.daily.streak + 1 : 1;
+      state.daily.lastDate = today;
+      const arcadeReward = 250 + state.daily.streak * 125;
+      const proReward = 2500 + state.daily.streak * 1000;
+      state.wallets.arcade.cash = round(state.wallets.arcade.cash + arcadeReward);
+      state.wallets.pro.cash = round(state.wallets.pro.cash + proReward);
+      state.logs.push({ tick: state.tick, action: "DAILY REWARD", symbol: "STREAK " + state.daily.streak, qty: "-", price: null, total: arcadeReward });
+      save();
+      gameFeel("win");
+      toast("Daily streak " + state.daily.streak, `${formatMoney(arcadeReward)} Arcade cash added. Rewards rise each day.`, "good");
+    }
+
+    function showTutorial() {
+      if (state.tutorialSkipped || state.tutorialStep >= tutorialSteps.length) return;
+      const step = tutorialSteps[state.tutorialStep];
+      el.tutorialTitle.textContent = step[0];
+      el.tutorialText.textContent = step[1];
+      el.nextTutorialBtn.textContent = state.tutorialStep === tutorialSteps.length - 1 ? "Finish" : "Next";
+      el.tutorialPop.classList.remove("hidden");
+    }
+
+    function nextTutorial() {
+      state.tutorialStep += 1;
+      if (state.tutorialStep >= tutorialSteps.length) {
+        state.tutorialSkipped = true;
+        el.tutorialPop.classList.add("hidden");
+      } else {
+        showTutorial();
+      }
+      save();
+    }
+
+    function skipTutorial() {
+      state.tutorialSkipped = true;
+      el.tutorialPop.classList.add("hidden");
+      save();
     }
 
     function formatMoney(value) {
@@ -1459,12 +1648,16 @@
       return marketStocks(mode).reduce((sum, stock) => sum + stock.owned * stock.price, 0);
     }
 
+    function fdValue(mode = state.mode) {
+      return state.fds.filter((fd) => fd.mode === mode).reduce((sum, fd) => sum + fd.maturity, 0);
+    }
+
     function investedValue(mode = state.mode) {
       return marketStocks(mode).reduce((sum, stock) => sum + stock.invested, 0);
     }
 
     function netWorth(mode = state.mode) {
-      return state.wallets[mode].cash + positionValue(mode);
+      return state.wallets[mode].cash + positionValue(mode) + fdValue(mode);
     }
 
     function unrealizedPL(mode = state.mode) {
@@ -1569,7 +1762,7 @@
       el.cashLabel.textContent = mode === "pro" ? "Pro Cash" : "Arcade Cash";
       el.cashValue.textContent = formatMoney(wallet.cash);
       el.netWorthValue.textContent = formatMoney(worth);
-      el.goalText.textContent = "Goal: " + formatMoney(goals[mode]);
+      el.goalText.textContent = "Goal: " + formatMoney(goals[mode]) + " including FDs";
       el.plValue.textContent = formatMoney(pl);
       el.plValue.className = pl >= 0 ? "good-text" : "bad-text";
       el.realizedValue.textContent = formatMoney(realized);
@@ -1590,12 +1783,23 @@
       return "Rookie";
     }
 
+    function patternName(pattern) {
+      return {
+        steady: "Steady",
+        trend: "Momentum",
+        spike: "Wild Spikes",
+        cycle: "Wave Cycle",
+        mean: "Snap Back"
+      }[pattern] || "Steady";
+    }
+
     function renderView() {
       setViewTabs();
       if (state.view === "portfolio") return renderPortfolio();
       if (state.view === "logs") return renderLogs();
       if (state.view === "tools") return renderTools();
       if (state.view === "goals") return renderGoals();
+      if (state.view === "guide") return renderGuide();
       return renderTrade();
     }
 
@@ -1613,7 +1817,7 @@
       const costBasis = stock.owned ? stock.avg * stock.owned : 0;
       const stockPL = stock.owned * stock.price - costBasis;
       const qtyKey = `qty-${stock.symbol}`;
-      const savedQty = Math.max(1, Math.floor(Number(rememberDraft(qtyKey, state.orderQty[stock.symbol] || 1)) || 1));
+      const savedQty = Math.min(400, Math.max(1, Math.floor(Number(rememberDraft(qtyKey, state.orderQty[stock.symbol] || 1)) || 1)));
       el.viewTitle.textContent = stock.symbol;
       el.viewSubtitle.textContent = `${stock.sector} stock in ${stock.market === "pro" ? "simulated Pro" : "Arcade"} market`;
 
@@ -1639,11 +1843,17 @@
               <div class="data-cell"><span>Your Buy Price</span><strong>${stock.owned ? formatMoney(stock.avg) : "-"}</strong></div>
               <div class="data-cell"><span>Worth Now</span><strong>${formatMoney(stock.owned * stock.price)}</strong></div>
               <div class="data-cell"><span>Profit So Far</span><strong class="${stockPL >= 0 ? "good-text" : "bad-text"}">${formatMoney(stockPL)}</strong></div>
+              <div class="data-cell"><span>Risk</span><strong>${stock.risk}</strong></div>
+              <div class="data-cell"><span>Pattern</span><strong>${patternName(stock.pattern)}</strong></div>
+            </div>
+            <div class="company-card">
+              <h3>${escapeHtml(stock.symbol)} Profile</h3>
+              <p>${escapeHtml(stock.description)}</p>
             </div>
 
             <div class="field">
               <label for="qtyInput">How many units?</label>
-              <input id="qtyInput" data-draft="${qtyKey}" type="number" min="1" step="1" value="${savedQty}" />
+              <input id="qtyInput" data-draft="${qtyKey}" type="number" min="1" max="400" step="1" value="${savedQty}" />
             </div>
             <div class="quick-row">
               <button data-qty="1">1</button>
@@ -1660,7 +1870,7 @@
       drawChart(document.getElementById("priceCanvas"), stock);
       bindDrafts(el.viewBody);
       document.getElementById("qtyInput").addEventListener("input", (event) => {
-        state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(event.target.value) || 1));
+        state.orderQty[stock.symbol] = Math.min(400, Math.max(1, Math.floor(Number(event.target.value) || 1)));
         save();
       });
       document.getElementById("buyBtn").addEventListener("click", () => trade("BUY"));
@@ -1669,11 +1879,11 @@
         button.addEventListener("click", () => {
           const input = document.getElementById("qtyInput");
           if (button.dataset.qty === "max") {
-            input.value = Math.max(1, Math.floor(state.wallets[stock.market].cash / stock.price));
+            input.value = Math.max(1, Math.min(400 - stock.owned, Math.floor(state.wallets[stock.market].cash / stock.price)));
           } else {
             input.value = button.dataset.qty;
           }
-          state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(input.value) || 1));
+          state.orderQty[stock.symbol] = Math.min(400, Math.max(1, Math.floor(Number(input.value) || 1)));
           state.draftInputs[qtyKey] = input.value;
           save();
         });
@@ -1719,11 +1929,12 @@
     function renderLogs() {
       el.viewTitle.textContent = "Transaction Log";
       el.viewSubtitle.textContent = "Your latest buys, sells, dividends, and market events";
-      if (!state.logs.length) {
+      const moneyActions = ["BUY", "SELL", "AUTO SELL", "SIP BUY", "FD CREATED", "FD MATURED", "DIVIDEND", "DAILY REWARD"];
+      const rows = [...state.logs].filter((log) => moneyActions.includes(log.action)).reverse().slice(0, 120);
+      if (!rows.length) {
         el.viewBody.innerHTML = `<div class="empty-state">No logs yet. Make your first trade.</div>`;
         return;
       }
-      const rows = [...state.logs].reverse().slice(0, 120);
       el.viewBody.innerHTML = `
         <div class="table-wrap">
           <table>
@@ -1749,6 +1960,7 @@
       const mode = state.mode;
       const stockOptions = marketStocks(mode).map((s) => `<option value="${s.symbol}">${s.symbol}</option>`).join("");
       const reminders = state.reminders.filter((r) => r.mode === mode);
+      const autoSells = state.autoSells.filter((a) => a.mode === mode);
       const fds = state.fds.filter((fd) => fd.mode === mode);
       const sips = state.sips.filter((sip) => sip.mode === mode);
       el.viewBody.innerHTML = `
@@ -1764,6 +1976,21 @@
             </div>
             <div class="list-stack">
               ${reminders.length ? reminders.map((r) => `<div class="list-item"><div>${escapeHtml(r.symbol)} ${r.direction} ${formatMoney(r.price)}<small>${r.done ? "Triggered" : "Waiting"}</small></div><button class="ghost-btn" data-del-reminder="${r.id}">Remove</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No reminders yet.</div>`}
+            </div>
+          </section>
+
+          <section class="tool-card">
+            <h3>Auto Sell</h3>
+            <p>Choose a stock, quantity, and target. InvestoPlay sells automatically when the price is reached.</p>
+            <div class="form-grid">
+              <div class="field"><label for="autoSellStock">Stock</label><select id="autoSellStock" data-draft="autoSellStock">${stockOptions}</select></div>
+              <div class="field"><label for="autoSellDirection">Trigger</label><select id="autoSellDirection" data-draft="autoSellDirection"><option value="above">Sell when price goes above</option><option value="below">Sell when price goes below</option></select></div>
+              <div class="field"><label for="autoSellPrice">Target price</label><input id="autoSellPrice" data-draft="autoSellPrice" type="number" min="1" value="${rememberDraft("autoSellPrice", Math.round(currentStock().price))}" /></div>
+              <div class="field"><label for="autoSellQty">Quantity</label><input id="autoSellQty" data-draft="autoSellQty" type="number" min="1" max="400" value="${rememberDraft("autoSellQty", 1)}" /></div>
+              <button class="primary-btn" id="createAutoSellBtn">Create Auto Sell</button>
+            </div>
+            <div class="list-stack">
+              ${autoSells.length ? autoSells.map((a) => `<div class="list-item"><div>${escapeHtml(a.symbol)} ${a.direction} ${formatMoney(a.price)}<small>Sell ${a.qty} units. ${a.done ? "Done" : "Waiting"}</small></div><button class="ghost-btn" data-stop-auto="${a.id}">Remove</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No auto sells yet.</div>`}
             </div>
           </section>
 
@@ -1797,9 +2024,11 @@
 
       bindDrafts(el.viewBody);
       document.getElementById("addReminderBtn").addEventListener("click", addReminder);
+      document.getElementById("createAutoSellBtn").addEventListener("click", createAutoSell);
       document.getElementById("createFdBtn").addEventListener("click", createFd);
       document.getElementById("createSipBtn").addEventListener("click", createSip);
       el.viewBody.querySelectorAll("[data-del-reminder]").forEach((btn) => btn.addEventListener("click", () => removeReminder(btn.dataset.delReminder)));
+      el.viewBody.querySelectorAll("[data-stop-auto]").forEach((btn) => btn.addEventListener("click", () => removeAutoSell(btn.dataset.stopAuto)));
       el.viewBody.querySelectorAll("[data-stop-sip]").forEach((btn) => btn.addEventListener("click", () => stopSip(btn.dataset.stopSip)));
     }
 
@@ -1843,7 +2072,6 @@
       const price = Math.max(1, Number(document.getElementById("reminderPrice").value) || 1);
       state.reminders.push({ id: makeId("rem"), mode: state.mode, symbol, direction, price, done: false });
       delete state.draftInputs.reminderPrice;
-      state.logs.push({ tick: state.tick, action: "REMINDER SET", symbol, qty: "-", price, total: null });
       save();
       gameFeel("start");
       toast("Reminder set", `${symbol} will alert when it goes ${direction} ${formatMoney(price)}.`, "info");
@@ -1852,6 +2080,26 @@
 
     function removeReminder(id) {
       state.reminders = state.reminders.filter((r) => r.id !== id);
+      save();
+      renderTools();
+    }
+
+    function createAutoSell() {
+      const symbol = document.getElementById("autoSellStock").value;
+      const direction = document.getElementById("autoSellDirection").value;
+      const price = Math.max(1, Number(document.getElementById("autoSellPrice").value) || 1);
+      const qty = Math.min(400, Math.max(1, Math.floor(Number(document.getElementById("autoSellQty").value) || 1)));
+      state.autoSells.push({ id: makeId("auto"), mode: state.mode, symbol, direction, price, qty, done: false });
+      delete state.draftInputs.autoSellPrice;
+      delete state.draftInputs.autoSellQty;
+      save();
+      gameFeel("start");
+      toast("Auto sell set", `${symbol} will sell ${qty} units when it goes ${direction} ${formatMoney(price)}.`, "info");
+      renderTools();
+    }
+
+    function removeAutoSell(id) {
+      state.autoSells = state.autoSells.filter((a) => a.id !== id);
       save();
       renderTools();
     }
@@ -1901,7 +2149,8 @@
       const stock = state.stocks[sip.symbol];
       const wallet = state.wallets[sip.mode];
       if (!stock || wallet.cash < sip.amount) return false;
-      const qty = Math.max(1, Math.floor(sip.amount / stock.price));
+      if (stock.owned >= 400) return false;
+      const qty = Math.min(400 - stock.owned, Math.max(1, Math.floor(sip.amount / stock.price)));
       const total = round(qty * stock.price);
       if (wallet.cash < total) return false;
       const newQty = stock.owned + qty;
@@ -1921,9 +2170,24 @@
         const hit = reminder.direction === "above" ? stock.price >= reminder.price : stock.price <= reminder.price;
         if (!hit) return;
         reminder.done = true;
-        state.logs.push({ tick: state.tick, action: "REMINDER HIT", symbol: stock.symbol, qty: "-", price: stock.price, total: null });
         gameFeel("win");
         toast("Price reminder", `${stock.symbol} is now ${formatMoney(stock.price)}.`, "info");
+      });
+
+      state.autoSells.forEach((autoSell) => {
+        if (autoSell.done) return;
+        const stock = state.stocks[autoSell.symbol];
+        if (!stock) return;
+        const hit = autoSell.direction === "above" ? stock.price >= autoSell.price : stock.price <= autoSell.price;
+        if (!hit) return;
+        const result = sellStock(stock, autoSell.qty, "AUTO SELL");
+        autoSell.done = true;
+        if (result) {
+          gameFeel("win");
+          toast("Auto sell complete", `${result.qty} ${stock.symbol} sold for ${formatMoney(result.total)}.`, "good");
+        } else {
+          toast("Auto sell skipped", `No ${stock.symbol} units were available to sell.`, "bad");
+        }
       });
 
       state.fds = state.fds.filter((fd) => {
@@ -1943,14 +2207,35 @@
       });
     }
 
+    function sellStock(stock, qty, actionLabel = "SELL") {
+      if (!stock.owned) return null;
+      const sellQty = Math.min(stock.owned, Math.max(1, Math.floor(qty || 1)));
+      if (stock.owned < sellQty) return null;
+      const wallet = state.wallets[stock.market];
+      const total = round(sellQty * stock.price);
+      const costSold = round(stock.avg * sellQty);
+      wallet.cash = round(wallet.cash + total);
+      wallet.realized = round(wallet.realized + total - costSold);
+      stock.owned -= sellQty;
+      stock.invested = stock.owned ? round(stock.avg * stock.owned) : 0;
+      if (!stock.owned) stock.avg = 0;
+      state.logs.push({ tick: state.tick, action: actionLabel, symbol: stock.symbol, qty: sellQty, price: stock.price, total });
+      return { qty: sellQty, total };
+    }
+
     function trade(action) {
       const stock = currentStock();
       const input = document.getElementById("qtyInput");
-      const qty = Math.max(1, Math.floor(Number(input.value) || 1));
+      const qty = Math.min(400, Math.max(1, Math.floor(Number(input.value) || 1)));
       state.orderQty[stock.symbol] = qty;
       const wallet = state.wallets[stock.market];
       const total = round(qty * stock.price);
       if (action === "BUY") {
+        if (stock.owned + qty > 400) {
+          gameFeel("bad");
+          toast("Max reached", "You can hold up to 400 units of one stock.", "bad");
+          return;
+        }
         if (wallet.cash < total) {
           gameFeel("bad");
           toast("Not enough cash for that order.", "bad");
@@ -1962,19 +2247,14 @@
         stock.invested = round(stock.avg * stock.owned);
         wallet.cash = round(wallet.cash - total);
       } else {
-        if (stock.owned < qty) {
+        const result = sellStock(stock, qty, "SELL");
+        if (!result) {
           gameFeel("bad");
           toast("You do not own enough units to sell.", "bad");
           return;
         }
-        const costSold = round(stock.avg * qty);
-        wallet.cash = round(wallet.cash + total);
-        wallet.realized = round(wallet.realized + total - costSold);
-        stock.owned -= qty;
-        stock.invested = stock.owned ? round(stock.avg * stock.owned) : 0;
-        if (!stock.owned) stock.avg = 0;
       }
-      state.logs.push({ tick: state.tick, action, symbol: stock.symbol, qty, price: stock.price, total });
+      if (action === "BUY") state.logs.push({ tick: state.tick, action, symbol: stock.symbol, qty, price: stock.price, total });
       checkAchievements();
       renderAll();
       save();
@@ -2019,7 +2299,6 @@
         text: `${sector}: ${positive ? "bullish news" : "pressure wave"}`
       };
       state.lastEvent = event.text;
-      state.logs.push({ tick: state.tick, action: "NEWS", symbol: sector, qty: "-", price: null, total: null });
       toast(event.text, positive ? "good" : "bad");
       return event;
     }
@@ -2039,7 +2318,7 @@
       unlock("five_trades", state.logs.filter((l) => l.action === "BUY" || l.action === "SELL").length >= 5);
       unlock("profit_1k", totalPL("arcade") + totalPL("pro") >= 1000);
       unlock("diversified", Object.values(state.stocks).filter((s) => s.owned > 0).length >= 3);
-      unlock("planner", state.reminders.length + state.fds.length + state.sips.length > 0);
+      unlock("planner", state.reminders.length + state.autoSells.length + state.fds.length + state.sips.length > 0);
       unlock("arcade_goal", netWorth("arcade") >= goals.arcade);
       unlock("pro_goal", netWorth("pro") >= goals.pro);
     }
@@ -2206,12 +2485,18 @@
       save();
     }
 
-    function showGuide() {
+    function renderGuide() {
       el.viewTitle.textContent = "Guide";
       el.viewSubtitle.textContent = "Rules, modes, and what was upgraded";
       el.viewBody.innerHTML = document.getElementById("guideTemplate").innerHTML;
+      const closeBtn = document.getElementById("closeGuideBtn");
+      if (closeBtn) closeBtn.addEventListener("click", () => setView("trade"));
+    }
+
+    function showGuide() {
       state.view = "guide";
-      setViewTabs();
+      renderAll();
+      save();
     }
 
     el.openLoginBtn.addEventListener("click", openLoginPage);
@@ -2229,6 +2514,8 @@
     el.goalsViewBtn.addEventListener("click", () => setView("goals"));
     el.themeBtn.addEventListener("click", cycleTheme);
     el.helpBtn.addEventListener("click", showGuide);
+    el.skipTutorialBtn.addEventListener("click", skipTutorial);
+    el.nextTutorialBtn.addEventListener("click", nextTutorial);
     el.homeBtn.addEventListener("click", openHomePage);
     el.saveBtn.addEventListener("click", () => {
       save();
