@@ -807,14 +807,6 @@
       backdrop-filter: blur(12px);
     }
 
-    .modal-backdrop.persistent {
-      display: grid;
-    }
-
-    .modal-backdrop.hidden {
-      display: none;
-    }
-
     .page-screen {
       background:
         linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(245, 158, 11, 0.08)),
@@ -1006,334 +998,1260 @@
       .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .trade-layout,
+      .grid-2,
+      .tool-grid,
+      .home-page {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 650px) {
+      header {
+        height: auto;
+        min-height: 64px;
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px;
+      }
+
+      .header-actions {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .workspace {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .view-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .login-grid,
+      .login-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .coin-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="app-shell">
+<body class="dark">
+  <div class="toast-stack" id="toastStack"></div>
+
+  <section class="modal-backdrop page-screen" id="homeModal">
+    <div class="home-page">
+      <div class="modal-card hero-card">
+        <div>
+          <div class="brand" style="margin-bottom: 22px;">
+            <div class="brand-mark">IP</div>
+            <div>INVESTO <span>PLAY</span></div>
+          </div>
+          <div class="hero-kicker">Dummy money. Real learning.</div>
+          <h1 class="hero-title">Investing made <span>playable</span></h1>
+          <p>
+            Build a portfolio, react to market news, unlock rewards, and learn how buying and selling works without using real money.
+          </p>
+          <div class="coin-grid" aria-hidden="true">
+            <div class="coin-tile">BUY</div>
+            <div class="coin-tile">HOLD</div>
+            <div class="coin-tile">SELL</div>
+          </div>
+        </div>
+        <div class="home-actions">
+          <button class="primary-btn" id="openLoginBtn">Go To Login</button>
+          <button class="ghost-btn" id="quickPlayBtn">Quick Guest Start</button>
+        </div>
+      </div>
+
+      <div class="modal-card guide-ribbon">
+        <div>
+          <div class="hero-kicker">Starter Guide</div>
+          <h2 style="margin: 8px 0 6px; font-size: 30px;">How it works</h2>
+          <p style="margin-top: 0;">Simple enough for beginners, polished enough to feel like a real trading terminal.</p>
+        </div>
+        <div class="guide-step"><b>1</b><div><strong>Choose a stock</strong><span>Arcade stocks are easy. Pro mode is still simulated, just bigger numbers.</span></div></div>
+        <div class="guide-step"><b>2</b><div><strong>Buy with fake cash</strong><span>Your cash goes down and your owned units go up.</span></div></div>
+        <div class="guide-step"><b>3</b><div><strong>Watch the price</strong><span>News events and price moves make the game feel alive.</span></div></div>
+        <div class="guide-step"><b>4</b><div><strong>Sell for profit</strong><span>If the price is higher than your buy price, your profit grows.</span></div></div>
+        <button class="primary-btn" id="ribbonLoginBtn">Start From Login</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal-backdrop page-screen hidden" id="loginModal">
+    <div class="modal-card">
+      <div class="brand" style="margin-bottom: 18px;">
+        <div class="brand-mark">IP</div>
+        <div>LOCAL <span>LOGIN</span></div>
+      </div>
+      <h1>Player Login</h1>
+      <p>Sign up or continue as a guest. Your progress saves locally in this browser only.</p>
+      <div class="field">
+        <label for="playerName">Player name</label>
+        <input id="playerName" maxlength="18" placeholder="Example: Atiksh" value="Atiksh" />
+      </div>
+      <div class="field" style="margin-top: 10px;">
+        <label for="playerPin">4 digit PIN</label>
+        <input id="playerPin" inputmode="numeric" maxlength="4" placeholder="1234" type="password" />
+      </div>
+      <div class="login-actions">
+        <button class="primary-btn" id="startBtn">Login / Sign Up</button>
+        <button class="ghost-btn" id="loginGuestBtn">Continue Guest</button>
+        <button class="ghost-btn" id="backHomeBtn">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-shell hidden" id="appShell" aria-live="polite">
     <header>
       <div class="brand">
-        <div class="brand-mark">₹</div>
-        <span>Investo<span>Play</span></span>
+        <div class="brand-mark">IP</div>
+        <div>INVESTO <span>PLAY</span></div>
       </div>
       <div class="header-actions">
-        <div class="segmented">
-          <button class="active">Dashboard</button>
-          <button>Tools</button>
+        <div class="segmented" aria-label="Market mode">
+          <button id="arcadeModeBtn" class="active">Arcade</button>
+          <button id="proModeBtn">Pro</button>
         </div>
-        <button class="icon-btn">👤</button>
+        <button class="icon-btn" id="themeBtn" title="Change theme">T</button>
+        <button class="icon-btn" id="helpBtn" title="Open guide">?</button>
+        <button class="ghost-btn" id="homeBtn">Home</button>
+        <button class="ghost-btn" id="saveBtn">Save</button>
+        <button class="danger-btn" id="resetBtn">Reset</button>
       </div>
     </header>
 
     <div class="workspace">
       <aside>
-        <div class="profile-card">
+        <section class="profile-card">
           <div class="profile-row">
             <div class="player">
-              <strong>Player Name</strong>
-              <small>Level 5</small>
+              <strong id="playerLabel">Guest</strong>
+              <small id="rankLabel">Rank: Rookie</small>
             </div>
-            <div class="rank-pill">Pro</div>
+            <div class="rank-pill" id="levelLabel">LV 1</div>
           </div>
-          <div class="meter">
-            <span style="width: 60%"></span>
-          </div>
-        </div>
+          <div class="meter" title="Goal progress"><span id="goalMeter"></span></div>
+        </section>
 
-        <div class="side-list">
-          <div class="nav-group-title">Stocks</div>
-          <button class="nav-item active">
-            <span>TechVision</span>
-            <span class="mini-price">₹245.50</span>
-          </button>
-          <button class="nav-item">
-            <span>GreenEnergy</span>
-            <span class="mini-price">₹178.25</span>
-          </button>
-          <button class="nav-item">
-            <span>FinanceHub</span>
-            <span class="mini-price">₹892.75</span>
-          </button>
+        <nav class="side-list" id="navList" aria-label="Stocks and views"></nav>
 
-          <div class="nav-group-title">Watchlist</div>
-          <button class="nav-item">
-            <span>CloudNet</span>
-            <span class="mini-price">₹456.00</span>
-          </button>
-          <button class="nav-item">
-            <span>BioMed</span>
-            <span class="mini-price">₹612.80</span>
-          </button>
-        </div>
-
-        <div class="watch-card">
-          <h3>Your FD's</h3>
-          <div class="watch-row">
-            <span>FD Amount:</span>
-            <strong>₹50,000</strong>
-          </div>
-          <div class="watch-row">
-            <span>Interest Rate:</span>
-            <strong>6.5% p.a.</strong>
-          </div>
-        </div>
+        <section class="watch-card">
+          <h3>Market Pulse</h3>
+          <div class="watch-row"><span>Event</span><strong id="pulseEvent">Calm market</strong></div>
+          <div class="watch-row"><span>Top mover</span><strong id="pulseMover">-</strong></div>
+          <div class="watch-row"><span>Trades</span><strong id="tradeCount">0</strong></div>
+        </section>
       </aside>
 
       <main>
-        <div class="stats-grid">
+        <section class="stats-grid">
           <div class="stat">
-            <label>Portfolio Value</label>
-            <strong>₹125,450.80</strong>
-            <small class="good-text">+2.45%</small>
-          </div>
-          <div class="stat">
-            <label>Cash Balance</label>
-            <strong>₹24,320.50</strong>
-            <small>Available to invest</small>
-          </div>
-          <div class="stat">
-            <label>Total Stocks</label>
-            <strong>245/400</strong>
-            <small>Max quantity: 400</small>
+            <label id="cashLabel">Arcade Cash</label>
+            <strong id="cashValue">Rs. 10,000.00</strong>
+            <small>Money available to buy stocks</small>
           </div>
           <div class="stat">
             <label>Net Worth</label>
-            <strong>₹199,771.30</strong>
-            <small>Portfolio + FD + Cash</small>
+            <strong id="netWorthValue">Rs. 10,000.00</strong>
+            <small id="goalText">Goal: Rs. 25,000</small>
           </div>
-        </div>
+          <div class="stat">
+            <label>Current Profit</label>
+            <strong id="plValue">Rs. 0.00</strong>
+            <small>Profit or loss on stocks you still own</small>
+          </div>
+          <div class="stat">
+            <label>Sold Profit</label>
+            <strong id="realizedValue">Rs. 0.00</strong>
+            <small>Profit or loss from stocks you sold</small>
+          </div>
+        </section>
 
-        <div class="main-card">
+        <section class="main-card">
           <div class="view-head">
             <div>
-              <h1>TechVision</h1>
-              <p>Latest trading data</p>
+              <h1 id="viewTitle">TechNova</h1>
+              <p id="viewSubtitle">Tech and AI stock in Arcade market</p>
             </div>
-            <button class="primary-btn">Tools</button>
-          </div>
-
-          <div class="view-body">
-            <div class="trade-layout">
-              <div class="chart-panel">
-                <div class="chart-wrap">
-                  <canvas id="chart"></canvas>
-                </div>
-                <div class="tag-row">
-                  <span class="tag good">↑ +2.34%</span>
-                  <span class="tag">52W H: ₹285</span>
-                  <span class="tag">52W L: ₹198</span>
-                </div>
-              </div>
-
-              <div class="order-panel">
-                <div class="price-now">₹245.50</div>
-                <div class="data-grid">
-                  <div class="data-cell">
-                    <span>Open</span>
-                    <strong>₹241.20</strong>
-                  </div>
-                  <div class="data-cell">
-                    <span>High</span>
-                    <strong>₹248.75</strong>
-                  </div>
-                  <div class="data-cell">
-                    <span>Low</span>
-                    <strong>₹240.10</strong>
-                  </div>
-                  <div class="data-cell">
-                    <span>Volume</span>
-                    <strong>2.4M</strong>
-                  </div>
-                </div>
-
-                <div class="field">
-                  <label>Quantity</label>
-                  <input type="number" placeholder="Enter quantity (Max: 400)" />
-                </div>
-
-                <div class="trade-actions">
-                  <button class="buy">Buy</button>
-                  <button class="sell">Sell</button>
-                </div>
-
-                <div class="quick-row">
-                  <button>+10</button>
-                  <button>+50</button>
-                  <button>+100</button>
-                </div>
-
-                <div class="tool-grid">
-                  <div class="tool-card">
-                    <h3>💰 Reminder</h3>
-                    <p>Get alerts when price reaches your target</p>
-                    <div class="form-grid">
-                      <input type="number" placeholder="Target price" />
-                      <button class="primary-btn">Set Reminder</button>
-                    </div>
-                  </div>
-
-                  <div class="tool-card">
-                    <h3>📈 Auto Sell</h3>
-                    <p>Automatically sell when price reaches target</p>
-                    <div class="form-grid">
-                      <input type="number" placeholder="Target price" />
-                      <input type="number" placeholder="Quantity" />
-                      <button class="primary-btn">Set Auto Sell</button>
-                    </div>
-                  </div>
-
-                  <div class="tool-card">
-                    <h3>📊 Analyzer</h3>
-                    <p>Get insights and analysis of this stock</p>
-                    <button class="primary-btn" style="width: 100%; margin-top: 12px;">Analyze</button>
-                  </div>
-                </div>
-
-                <div class="list-stack">
-                  <div class="list-item">
-                    <div>
-                      <strong>Recent Trades</strong>
-                      <small>Last 5 transactions</small>
-                    </div>
-                  </div>
-                  <div class="list-item">
-                    <span>Bought 50 shares</span>
-                    <span class="good-text">₹12,275</span>
-                  </div>
-                  <div class="list-item">
-                    <span>Sold 20 shares</span>
-                    <span class="bad-text">-₹4,910</span>
-                  </div>
-                </div>
-              </div>
+            <div class="segmented" aria-label="Main views">
+              <button id="tradeViewBtn" class="active">Trade</button>
+              <button id="portfolioViewBtn">Portfolio</button>
+              <button id="logsViewBtn">Logs</button>
+              <button id="toolsViewBtn">Tools</button>
+              <button id="goalsViewBtn">Goals</button>
             </div>
           </div>
-        </div>
+          <div class="view-body" id="viewBody"></div>
+        </section>
       </main>
     </div>
   </div>
 
-  <!-- Persistent Guide Modal -->
-  <div class="modal-backdrop persistent" id="guideModal">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h1>Getting Started</h1>
-        <button class="ghost-btn" onclick="closeGuide()" style="width: auto; min-width: 38px;">✕</button>
-      </div>
-      <p>Master the art of investing with InvestoPlay. Here's your journey:</p>
-
-      <div class="guide-ribbon">
-        <div class="guide-step">
-          <b>1</b>
-          <div>
-            <strong>Choose a Stock</strong>
-            <span>Browse from 50+ companies and select ones that interest you</span>
-          </div>
-        </div>
-
-        <div class="guide-step">
-          <b>2</b>
-          <div>
-            <strong>Set Your Strategy</strong>
-            <span>Use Reminder & Auto Sell tools to automate your trading strategy</span>
-          </div>
-        </div>
-
-        <div class="guide-step">
-          <b>3</b>
-          <div>
-            <strong>Monitor & Analyze</strong>
-            <span>Track your portfolio and use Analyzer for data-driven decisions</span>
-          </div>
-        </div>
-
-        <div class="guide-step">
-          <b>4</b>
-          <div>
-            <strong>Invest & Earn</strong>
-            <span>Build wealth with max 400 stocks per holding and your FD interest</span>
-          </div>
-        </div>
-
-        <div class="guide-step">
-          <b>5</b>
-          <div>
-            <strong>Compete</strong>
-            <span>Climb the leaderboard and unlock achievements as you progress</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="home-actions">
-        <button class="primary-btn">Start Trading</button>
-        <button class="ghost-btn">Learn More</button>
-      </div>
+  <template id="guideTemplate">
+    <div class="grid-2">
+      <section class="info-panel">
+        <h3 class="panel-title">How To Play</h3>
+        <p>Buy stocks when you think they are low. Sell when they rise. Your net worth is cash plus the live value of everything you own.</p>
+        <p>Arcade mode is faster and starts at Rs. 10,000. Pro mode starts at Rs. 2,00,000 and uses Indian-style stock names, but all prices here are simulated.</p>
+      </section>
+      <section class="info-panel">
+        <h3 class="panel-title">What The Game Tracks</h3>
+        <p>InvestoPlay saves your player locally, tracks cash, stocks owned, simple profit, goals, rewards, and surprise news events.</p>
+      </section>
     </div>
-  </div>
-
-  <div class="toast-stack" id="toastStack"></div>
+  </template>
 
   <script>
-    // Guide modal stays open until user closes it
-    function closeGuide() {
-      document.getElementById('guideModal').classList.add('hidden');
-      localStorage.setItem('guideViewed', 'true');
+    const STORE_KEY = "investoplay-save-v2";
+    const themes = ["dark", "arcade", "light"];
+    const goals = { arcade: 25000, pro: 350000 };
+
+    const sectors = {
+      arcade: {
+        "Tech and AI": [
+          ["TechNova", 218, 0.046],
+          ["CryptoWave", 142, 0.065],
+          ["RoboWorks", 176, 0.038],
+          ["GameX", 96, 0.052]
+        ],
+        "Energy and Eco": [
+          ["GreenEnergy", 122, 0.036],
+          ["AquaTech", 88, 0.032]
+        ],
+        "Lifestyle": [
+          ["FoodiesHub", 72, 0.03],
+          ["FashionFi", 110, 0.034],
+          ["EduGrow", 64, 0.028]
+        ],
+        "Aerospace": [
+          ["AeroMax", 240, 0.044],
+          ["SpaceXp", 310, 0.058]
+        ],
+        "Essentials": [
+          ["HealthFirst", 134, 0.026],
+          ["BuildPro", 188, 0.031],
+          ["AutoDrive", 205, 0.042]
+        ]
+      },
+      pro: {
+        "Real Market Hub": [
+          ["RELIANCE", 2940, 0.018],
+          ["ZOMATO", 185, 0.032],
+          ["HDFCBANK", 1520, 0.016],
+          ["TATAMOTORS", 978, 0.027],
+          ["SBIN", 824, 0.021],
+          ["ITC", 438, 0.015]
+        ]
+      }
+    };
+
+    const achievements = [
+      ["first_trade", "First Trade", "Buy or sell once."],
+      ["five_trades", "Market Mover", "Complete 5 trades."],
+      ["profit_1k", "Profit Spark", "Reach Rs. 1,000 total P/L."],
+      ["diversified", "Diversified", "Hold 3 different stocks."],
+      ["planner", "Smart Planner", "Create a reminder, FD, or SIP."],
+      ["arcade_goal", "Arcade Winner", "Reach the Arcade net worth goal."],
+      ["pro_goal", "Pro Winner", "Reach the Pro net worth goal."]
+    ];
+
+    const state = {
+      player: "Guest",
+      pin: "",
+      themeIndex: 0,
+      mode: "arcade",
+      selected: "TechNova",
+      view: "trade",
+      tick: 0,
+      lastEvent: "Calm market",
+      wallets: {
+        arcade: { cash: 10000, realized: 0 },
+        pro: { cash: 200000, realized: 0 }
+      },
+      stocks: {},
+      reminders: [],
+      fds: [],
+      sips: [],
+      orderQty: {},
+      draftInputs: {},
+      logs: [],
+      unlocked: {}
+    };
+
+    const el = {
+      appShell: document.getElementById("appShell"),
+      homeModal: document.getElementById("homeModal"),
+      loginModal: document.getElementById("loginModal"),
+      playerName: document.getElementById("playerName"),
+      playerPin: document.getElementById("playerPin"),
+      openLoginBtn: document.getElementById("openLoginBtn"),
+      ribbonLoginBtn: document.getElementById("ribbonLoginBtn"),
+      quickPlayBtn: document.getElementById("quickPlayBtn"),
+      startBtn: document.getElementById("startBtn"),
+      loginGuestBtn: document.getElementById("loginGuestBtn"),
+      backHomeBtn: document.getElementById("backHomeBtn"),
+      playerLabel: document.getElementById("playerLabel"),
+      rankLabel: document.getElementById("rankLabel"),
+      levelLabel: document.getElementById("levelLabel"),
+      goalMeter: document.getElementById("goalMeter"),
+      navList: document.getElementById("navList"),
+      pulseEvent: document.getElementById("pulseEvent"),
+      pulseMover: document.getElementById("pulseMover"),
+      tradeCount: document.getElementById("tradeCount"),
+      cashLabel: document.getElementById("cashLabel"),
+      cashValue: document.getElementById("cashValue"),
+      netWorthValue: document.getElementById("netWorthValue"),
+      goalText: document.getElementById("goalText"),
+      plValue: document.getElementById("plValue"),
+      realizedValue: document.getElementById("realizedValue"),
+      viewTitle: document.getElementById("viewTitle"),
+      viewSubtitle: document.getElementById("viewSubtitle"),
+      viewBody: document.getElementById("viewBody"),
+      arcadeModeBtn: document.getElementById("arcadeModeBtn"),
+      proModeBtn: document.getElementById("proModeBtn"),
+      tradeViewBtn: document.getElementById("tradeViewBtn"),
+      portfolioViewBtn: document.getElementById("portfolioViewBtn"),
+      logsViewBtn: document.getElementById("logsViewBtn"),
+      toolsViewBtn: document.getElementById("toolsViewBtn"),
+      goalsViewBtn: document.getElementById("goalsViewBtn"),
+      themeBtn: document.getElementById("themeBtn"),
+      helpBtn: document.getElementById("helpBtn"),
+      homeBtn: document.getElementById("homeBtn"),
+      saveBtn: document.getElementById("saveBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      toastStack: document.getElementById("toastStack")
+    };
+
+    function makeStock(symbol, base, volatility, market, sector) {
+      const hist = [];
+      let price = base * (0.88 + Math.random() * 0.24);
+      for (let i = 0; i < 55; i += 1) {
+        price = Math.max(5, price * (1 + randomNormal() * volatility));
+        hist.push(round(price));
+      }
+      return {
+        symbol,
+        market,
+        sector,
+        price: hist[hist.length - 1],
+        previous: hist[hist.length - 2],
+        volatility,
+        momentum: 0,
+        owned: 0,
+        avg: 0,
+        invested: 0,
+        high: Math.max(...hist),
+        low: Math.min(...hist),
+        history: hist
+      };
     }
 
-    // Show guide on first visit
-    window.addEventListener('load', () => {
-      if (!localStorage.getItem('guideViewed')) {
-        document.getElementById('guideModal').classList.remove('hidden');
-      }
-    });
-
-    // Auto Sell functionality
-    const autoSellTools = {};
-    
-    function setupAutoSell() {
-      const inputs = document.querySelectorAll('.tool-card:nth-child(2) input');
-      const btn = document.querySelectorAll('.tool-card:nth-child(2) button')[0];
-      
-      btn.addEventListener('click', function() {
-        const targetPrice = parseFloat(inputs[0].value);
-        const quantity = parseInt(inputs[1].value);
-        
-        if (targetPrice && quantity && quantity <= 400) {
-          autoSellTools.targetPrice = targetPrice;
-          autoSellTools.quantity = quantity;
-          showToast(`Auto Sell Set: ${quantity} shares at ₹${targetPrice}`, 'info');
-          inputs[0].value = '';
-          inputs[1].value = '';
-        } else {
-          showToast('Invalid quantity. Max 400 stocks allowed.', 'bad');
-        }
+    function initStocks() {
+      Object.entries(sectors).forEach(([market, groups]) => {
+        Object.entries(groups).forEach(([sector, rows]) => {
+          rows.forEach(([symbol, base, volatility]) => {
+            state.stocks[symbol] = makeStock(symbol, base, volatility, market, sector);
+          });
+        });
       });
     }
 
-    // Toast notification system
-    function showToast(message, type = 'info') {
-      const stack = document.getElementById('toastStack');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<strong>${type.toUpperCase()}</strong><p>${message}</p>`;
-      stack.appendChild(toast);
-      
-      setTimeout(() => toast.remove(), 3000);
+    function loadSave() {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return false;
+      try {
+        const saved = JSON.parse(raw);
+        if (!saved || !saved.stocks || !saved.wallets) return false;
+        Object.assign(state, saved);
+        state.reminders ||= [];
+        state.fds ||= [];
+        state.sips ||= [];
+        state.orderQty ||= {};
+        state.draftInputs ||= {};
+        return true;
+      } catch {
+        return false;
+      }
     }
 
-    // Initialize
-    setupAutoSell();
-
-    // Chart placeholder
-    const canvas = document.getElementById('chart');
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#666';
-      ctx.font = '14px Arial';
-      ctx.fillText('Chart will appear here', canvas.width/2 - 50, canvas.height/2);
+    function save() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
     }
+
+    function resetGame() {
+      if (!confirm("Reset InvestoPlay progress on this browser?")) return;
+      localStorage.removeItem(STORE_KEY);
+      location.reload();
+    }
+
+    function start(player, pin = "") {
+      state.player = (player || "Guest").trim().slice(0, 18) || "Guest";
+      state.pin = String(pin || "").slice(0, 4);
+      el.homeModal.classList.add("hidden");
+      el.loginModal.classList.add("hidden");
+      el.appShell.classList.remove("hidden");
+      save();
+      renderAll();
+      gameFeel("start");
+      toast("Welcome", "Progress is saved locally for " + state.player + ".", "info");
+    }
+
+    function openLoginPage() {
+      el.homeModal.classList.add("hidden");
+      el.loginModal.classList.remove("hidden");
+      el.appShell.classList.add("hidden");
+      haptic(12);
+    }
+
+    function openHomePage() {
+      save();
+      el.loginModal.classList.add("hidden");
+      el.appShell.classList.add("hidden");
+      el.homeModal.classList.remove("hidden");
+      haptic(12);
+    }
+
+    function formatMoney(value) {
+      return "Rs. " + Number(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function round(value) {
+      return Math.round(value * 100) / 100;
+    }
+
+    function randomNormal() {
+      let u = 0;
+      let v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function marketStocks(mode = state.mode) {
+      return Object.values(state.stocks).filter((stock) => stock.market === mode);
+    }
+
+    function currentStock() {
+      return state.stocks[state.selected];
+    }
+
+    function positionValue(mode = state.mode) {
+      return marketStocks(mode).reduce((sum, stock) => sum + stock.owned * stock.price, 0);
+    }
+
+    function investedValue(mode = state.mode) {
+      return marketStocks(mode).reduce((sum, stock) => sum + stock.invested, 0);
+    }
+
+    function netWorth(mode = state.mode) {
+      return state.wallets[mode].cash + positionValue(mode);
+    }
+
+    function unrealizedPL(mode = state.mode) {
+      return positionValue(mode) - investedValue(mode);
+    }
+
+    function totalPL(mode = state.mode) {
+      return state.wallets[mode].realized + unrealizedPL(mode);
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      const firstSymbol = Object.values(state.stocks).find((s) => s.market === mode).symbol;
+      if (!state.stocks[state.selected] || state.stocks[state.selected].market !== mode) state.selected = firstSymbol;
+      state.view = "trade";
+      renderAll();
+      save();
+    }
+
+    function setView(view) {
+      state.view = view;
+      renderAll();
+      save();
+    }
+
+    function selectStock(symbol) {
+      state.selected = symbol;
+      state.mode = state.stocks[symbol].market;
+      state.view = "trade";
+      renderAll();
+      save();
+    }
+
+    function rememberDraft(id, fallback = "") {
+      return state.draftInputs[id] ?? fallback;
+    }
+
+    function bindDrafts(container = document) {
+      container.querySelectorAll("[data-draft]").forEach((field) => {
+        const key = field.dataset.draft;
+        if (state.draftInputs[key] !== undefined) field.value = state.draftInputs[key];
+        field.addEventListener("input", () => {
+          state.draftInputs[key] = field.value;
+          save();
+        });
+        field.addEventListener("change", () => {
+          state.draftInputs[key] = field.value;
+          save();
+        });
+      });
+    }
+
+    function renderNav() {
+      let html = "";
+      html += navButton("Portfolio", "portfolio", "portfolio");
+      html += navButton("Transaction Log", "logs", "logs");
+      html += navButton("Money Tools", "tools", "tools");
+      html += navButton("Goals", "goals", "goals");
+      Object.entries(sectors).forEach(([market, groups]) => {
+        Object.entries(groups).forEach(([sector, rows]) => {
+          html += `<div class="nav-group-title">${escapeHtml(market === "pro" ? sector + " [PRO]" : sector)}</div>`;
+          rows.forEach(([symbol]) => {
+            const s = state.stocks[symbol];
+            const active = state.view === "trade" && state.selected === symbol ? " active" : "";
+            const pro = s.market === "pro" ? " pro" : "";
+            html += `
+              <button class="nav-item${active}${pro}" data-stock="${symbol}">
+                <span>${escapeHtml(symbol)}</span>
+                <span class="mini-price">${formatCompact(s.price)}</span>
+              </button>`;
+          });
+        });
+      });
+      el.navList.innerHTML = html;
+      el.navList.querySelectorAll("[data-stock]").forEach((btn) => {
+        btn.addEventListener("click", () => selectStock(btn.dataset.stock));
+      });
+      el.navList.querySelectorAll("[data-view]").forEach((btn) => {
+        btn.addEventListener("click", () => setView(btn.dataset.view));
+      });
+    }
+
+    function navButton(label, view, id) {
+      const active = state.view === view ? " active" : "";
+      return `<button class="nav-item${active}" data-view="${id}"><span>${label}</span><span></span></button>`;
+    }
+
+    function renderStats() {
+      const mode = state.mode;
+      const wallet = state.wallets[mode];
+      const worth = netWorth(mode);
+      const pl = unrealizedPL(mode);
+      const realized = wallet.realized;
+      const progress = Math.max(0, Math.min(100, (worth / goals[mode]) * 100));
+
+      el.playerLabel.textContent = state.player;
+      const level = Math.max(1, Math.floor((state.logs.length + Object.keys(state.unlocked).length * 3) / 4) + 1);
+      el.levelLabel.textContent = "LV " + level;
+      el.rankLabel.textContent = "Rank: " + rankFor(worth, mode);
+      el.goalMeter.style.width = progress + "%";
+
+      el.cashLabel.textContent = mode === "pro" ? "Pro Cash" : "Arcade Cash";
+      el.cashValue.textContent = formatMoney(wallet.cash);
+      el.netWorthValue.textContent = formatMoney(worth);
+      el.goalText.textContent = "Goal: " + formatMoney(goals[mode]);
+      el.plValue.textContent = formatMoney(pl);
+      el.plValue.className = pl >= 0 ? "good-text" : "bad-text";
+      el.realizedValue.textContent = formatMoney(realized);
+      el.realizedValue.className = realized >= 0 ? "good-text" : "bad-text";
+      el.arcadeModeBtn.classList.toggle("active", mode === "arcade");
+      el.proModeBtn.classList.toggle("active", mode === "pro");
+      el.tradeCount.textContent = state.logs.length;
+      el.pulseEvent.textContent = state.lastEvent;
+      el.pulseMover.textContent = topMover();
+    }
+
+    function rankFor(worth, mode) {
+      const start = mode === "pro" ? 200000 : 10000;
+      if (worth >= goals[mode]) return "Champion";
+      if (worth >= start * 1.6) return "Strategist";
+      if (worth >= start * 1.25) return "Investor";
+      if (worth >= start * 1.05) return "Learner";
+      return "Rookie";
+    }
+
+    function renderView() {
+      setViewTabs();
+      if (state.view === "portfolio") return renderPortfolio();
+      if (state.view === "logs") return renderLogs();
+      if (state.view === "tools") return renderTools();
+      if (state.view === "goals") return renderGoals();
+      return renderTrade();
+    }
+
+    function setViewTabs() {
+      el.tradeViewBtn.classList.toggle("active", state.view === "trade");
+      el.portfolioViewBtn.classList.toggle("active", state.view === "portfolio");
+      el.logsViewBtn.classList.toggle("active", state.view === "logs");
+      el.toolsViewBtn.classList.toggle("active", state.view === "tools");
+      el.goalsViewBtn.classList.toggle("active", state.view === "goals");
+    }
+
+    function renderTrade() {
+      const stock = currentStock();
+      const change = stock.price - stock.previous;
+      const costBasis = stock.owned ? stock.avg * stock.owned : 0;
+      const stockPL = stock.owned * stock.price - costBasis;
+      const qtyKey = `qty-${stock.symbol}`;
+      const savedQty = Math.max(1, Math.floor(Number(rememberDraft(qtyKey, state.orderQty[stock.symbol] || 1)) || 1));
+      el.viewTitle.textContent = stock.symbol;
+      el.viewSubtitle.textContent = `${stock.sector} stock in ${stock.market === "pro" ? "simulated Pro" : "Arcade"} market`;
+
+      el.viewBody.innerHTML = `
+        <div class="trade-layout">
+          <section class="chart-panel">
+            <div class="chart-wrap"><canvas id="priceCanvas"></canvas></div>
+          </section>
+          <section class="order-panel">
+            <div>
+              <div class="panel-title">Live Price</div>
+              <div class="price-now ${change >= 0 ? "good-text" : "bad-text"}">${formatMoney(stock.price)}</div>
+              <div class="tag-row">
+                <span class="tag ${change >= 0 ? "good" : "bad"}">${change >= 0 ? "+" : ""}${formatMoney(change)}</span>
+                <span class="tag">High ${formatMoney(stock.high)}</span>
+                <span class="tag">Low ${formatMoney(stock.low)}</span>
+                ${stock.market === "pro" ? `<span class="tag" style="color: var(--gold);">SIM PRO</span>` : ""}
+              </div>
+            </div>
+
+            <div class="data-grid">
+              <div class="data-cell"><span>You Own</span><strong>${stock.owned} units</strong></div>
+              <div class="data-cell"><span>Your Buy Price</span><strong>${stock.owned ? formatMoney(stock.avg) : "-"}</strong></div>
+              <div class="data-cell"><span>Worth Now</span><strong>${formatMoney(stock.owned * stock.price)}</strong></div>
+              <div class="data-cell"><span>Profit So Far</span><strong class="${stockPL >= 0 ? "good-text" : "bad-text"}">${formatMoney(stockPL)}</strong></div>
+            </div>
+
+            <div class="field">
+              <label for="qtyInput">How many units?</label>
+              <input id="qtyInput" data-draft="${qtyKey}" type="number" min="1" step="1" value="${savedQty}" />
+            </div>
+            <div class="quick-row">
+              <button data-qty="1">1</button>
+              <button data-qty="5">5</button>
+              <button data-qty="max">Max</button>
+            </div>
+            <div class="trade-actions">
+              <button class="buy" id="buyBtn">BUY</button>
+              <button class="sell" id="sellBtn">SELL</button>
+            </div>
+          </section>
+        </div>`;
+
+      drawChart(document.getElementById("priceCanvas"), stock);
+      bindDrafts(el.viewBody);
+      document.getElementById("qtyInput").addEventListener("input", (event) => {
+        state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(event.target.value) || 1));
+        save();
+      });
+      document.getElementById("buyBtn").addEventListener("click", () => trade("BUY"));
+      document.getElementById("sellBtn").addEventListener("click", () => trade("SELL"));
+      el.viewBody.querySelectorAll("[data-qty]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const input = document.getElementById("qtyInput");
+          if (button.dataset.qty === "max") {
+            input.value = Math.max(1, Math.floor(state.wallets[stock.market].cash / stock.price));
+          } else {
+            input.value = button.dataset.qty;
+          }
+          state.orderQty[stock.symbol] = Math.max(1, Math.floor(Number(input.value) || 1));
+          state.draftInputs[qtyKey] = input.value;
+          save();
+        });
+      });
+    }
+
+    function renderPortfolio() {
+      el.viewTitle.textContent = "Portfolio";
+      el.viewSubtitle.textContent = "The stocks you own and whether they are winning or losing";
+      const rows = Object.values(state.stocks).filter((s) => s.owned > 0);
+      if (!rows.length) {
+        el.viewBody.innerHTML = `<div class="empty-state">No positions yet. Buy a stock to build your portfolio.</div>`;
+        return;
+      }
+      el.viewBody.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th><th>Mode</th><th>Units</th><th>Your Buy Price</th><th>Price Now</th><th>Worth Now</th><th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((s) => {
+                const value = s.owned * s.price;
+                const pl = value - s.invested;
+                return `
+                  <tr>
+                    <td>${escapeHtml(s.symbol)}</td>
+                    <td>${s.market === "pro" ? "Sim Pro" : "Arcade"}</td>
+                    <td>${s.owned}</td>
+                    <td class="money">${formatMoney(s.avg)}</td>
+                    <td class="money">${formatMoney(s.price)}</td>
+                    <td class="money">${formatMoney(value)}</td>
+                    <td class="money ${pl >= 0 ? "good-text" : "bad-text"}">${formatMoney(pl)}</td>
+                  </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderLogs() {
+      el.viewTitle.textContent = "Transaction Log";
+      el.viewSubtitle.textContent = "Your latest buys, sells, dividends, and market events";
+      if (!state.logs.length) {
+        el.viewBody.innerHTML = `<div class="empty-state">No logs yet. Make your first trade.</div>`;
+        return;
+      }
+      const rows = [...state.logs].reverse().slice(0, 120);
+      el.viewBody.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tick</th><th>Action</th><th>Stock</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+            <tbody>
+              ${rows.map((log) => `
+                <tr>
+                  <td>${log.tick}</td>
+                  <td>${escapeHtml(log.action)}</td>
+                  <td>${escapeHtml(log.symbol || "-")}</td>
+                  <td>${log.qty || "-"}</td>
+                  <td class="money">${log.price ? formatMoney(log.price) : "-"}</td>
+                  <td class="money">${log.total ? formatMoney(log.total) : "-"}</td>
+                </tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderTools() {
+      el.viewTitle.textContent = "Money Tools";
+      el.viewSubtitle.textContent = "Professional-style tools, simplified for fake-money learning";
+      const mode = state.mode;
+      const stockOptions = marketStocks(mode).map((s) => `<option value="${s.symbol}">${s.symbol}</option>`).join("");
+      const reminders = state.reminders.filter((r) => r.mode === mode);
+      const fds = state.fds.filter((fd) => fd.mode === mode);
+      const sips = state.sips.filter((sip) => sip.mode === mode);
+      el.viewBody.innerHTML = `
+        <div class="tool-grid">
+          <section class="tool-card">
+            <h3>Price Reminder</h3>
+            <p>Set a target and InvestoPlay will notify you when the simulated price touches it.</p>
+            <div class="form-grid">
+              <div class="field"><label for="reminderStock">Stock</label><select id="reminderStock" data-draft="reminderStock">${stockOptions}</select></div>
+              <div class="field"><label for="reminderDirection">Trigger</label><select id="reminderDirection" data-draft="reminderDirection"><option value="above">Price goes above</option><option value="below">Price goes below</option></select></div>
+              <div class="field"><label for="reminderPrice">Target price</label><input id="reminderPrice" data-draft="reminderPrice" type="number" min="1" value="${rememberDraft("reminderPrice", Math.round(currentStock().price))}" /></div>
+              <button class="primary-btn" id="addReminderBtn">Set Reminder</button>
+            </div>
+            <div class="list-stack">
+              ${reminders.length ? reminders.map((r) => `<div class="list-item"><div>${escapeHtml(r.symbol)} ${r.direction} ${formatMoney(r.price)}<small>${r.done ? "Triggered" : "Waiting"}</small></div><button class="ghost-btn" data-del-reminder="${r.id}">Remove</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No reminders yet.</div>`}
+            </div>
+          </section>
+
+          <section class="tool-card">
+            <h3>FD Simulator</h3>
+            <p>Lock fake cash for a few market ticks and get fixed interest when it matures.</p>
+            <div class="form-grid">
+              <div class="field"><label for="fdAmount">Amount</label><input id="fdAmount" data-draft="fdAmount" type="number" min="100" value="${rememberDraft("fdAmount", mode === "pro" ? 10000 : 1000)}" /></div>
+              <div class="field"><label for="fdTicks">Duration</label><select id="fdTicks" data-draft="fdTicks"><option value="20">Short - 20 ticks</option><option value="40">Medium - 40 ticks</option><option value="70">Long - 70 ticks</option></select></div>
+              <button class="primary-btn" id="createFdBtn">Create FD</button>
+            </div>
+            <div class="list-stack">
+              ${fds.length ? fds.map((fd) => `<div class="list-item"><div>${formatMoney(fd.amount)}<small>Matures in ${Math.max(0, fd.endTick - state.tick)} ticks. Return: ${formatMoney(fd.maturity)}</small></div><span class="tag">FD</span></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No FDs yet.</div>`}
+            </div>
+          </section>
+
+          <section class="tool-card">
+            <h3>SIP Simulator</h3>
+            <p>Automatically invest fake cash into one stock every few ticks, like a tiny learning SIP.</p>
+            <div class="form-grid">
+              <div class="field"><label for="sipStock">Stock</label><select id="sipStock" data-draft="sipStock">${stockOptions}</select></div>
+              <div class="field"><label for="sipAmount">Amount each time</label><input id="sipAmount" data-draft="sipAmount" type="number" min="100" value="${rememberDraft("sipAmount", mode === "pro" ? 5000 : 500)}" /></div>
+              <div class="field"><label for="sipEvery">Frequency</label><select id="sipEvery" data-draft="sipEvery"><option value="10">Every 10 ticks</option><option value="20">Every 20 ticks</option><option value="30">Every 30 ticks</option></select></div>
+              <button class="primary-btn" id="createSipBtn">Start SIP</button>
+            </div>
+            <div class="list-stack">
+              ${sips.length ? sips.map((sip) => `<div class="list-item"><div>${escapeHtml(sip.symbol)} - ${formatMoney(sip.amount)}<small>Every ${sip.every} ticks. Next in ${Math.max(0, sip.nextTick - state.tick)} ticks.</small></div><button class="ghost-btn" data-stop-sip="${sip.id}">Stop</button></div>`).join("") : `<div class="empty-state" style="min-height: 90px;">No SIPs yet.</div>`}
+            </div>
+          </section>
+        </div>`;
+
+      bindDrafts(el.viewBody);
+      document.getElementById("addReminderBtn").addEventListener("click", addReminder);
+      document.getElementById("createFdBtn").addEventListener("click", createFd);
+      document.getElementById("createSipBtn").addEventListener("click", createSip);
+      el.viewBody.querySelectorAll("[data-del-reminder]").forEach((btn) => btn.addEventListener("click", () => removeReminder(btn.dataset.delReminder)));
+      el.viewBody.querySelectorAll("[data-stop-sip]").forEach((btn) => btn.addEventListener("click", () => stopSip(btn.dataset.stopSip)));
+    }
+
+    function renderGoals() {
+      el.viewTitle.textContent = "Goals";
+      el.viewSubtitle.textContent = "Achievements and progress for the full game";
+      const rows = achievements.map(([id, title, desc]) => `
+        <div class="achievement ${state.unlocked[id] ? "done" : ""}">
+          <div><strong>${title}</strong><small>${desc}</small></div>
+          <strong>${state.unlocked[id] ? "DONE" : "LOCKED"}</strong>
+        </div>`).join("");
+      const leaderboard = buildLeaderboard().map((row, index) => `
+        <tr><td>${index + 1}</td><td>${escapeHtml(row.name)}</td><td class="money">${formatMoney(row.worth)}</td></tr>`).join("");
+      el.viewBody.innerHTML = `
+        <div class="grid-2">
+          <section>${rows}</section>
+          <section class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Player</th><th>Net Worth</th></tr></thead>
+              <tbody>${leaderboard}</tbody>
+            </table>
+          </section>
+        </div>`;
+    }
+
+    function buildLeaderboard() {
+      const base = netWorth(state.mode);
+      const names = ["MarketWizard", "PixelBull", "RiskRunner", "ChartChamp"];
+      const rivals = names.map((name, i) => ({ name, worth: base * (0.82 + i * 0.09 + Math.random() * 0.05) }));
+      rivals.push({ name: state.player, worth: base });
+      return rivals.sort((a, b) => b.worth - a.worth);
+    }
+
+    function makeId(prefix) {
+      return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+    }
+
+    function addReminder() {
+      const symbol = document.getElementById("reminderStock").value;
+      const direction = document.getElementById("reminderDirection").value;
+      const price = Math.max(1, Number(document.getElementById("reminderPrice").value) || 1);
+      state.reminders.push({ id: makeId("rem"), mode: state.mode, symbol, direction, price, done: false });
+      delete state.draftInputs.reminderPrice;
+      state.logs.push({ tick: state.tick, action: "REMINDER SET", symbol, qty: "-", price, total: null });
+      save();
+      gameFeel("start");
+      toast("Reminder set", `${symbol} will alert when it goes ${direction} ${formatMoney(price)}.`, "info");
+      renderTools();
+    }
+
+    function removeReminder(id) {
+      state.reminders = state.reminders.filter((r) => r.id !== id);
+      save();
+      renderTools();
+    }
+
+    function createFd() {
+      const amount = Math.max(100, Number(document.getElementById("fdAmount").value) || 0);
+      const ticks = Number(document.getElementById("fdTicks").value) || 20;
+      const wallet = state.wallets[state.mode];
+      if (wallet.cash < amount) {
+        gameFeel("bad");
+        toast("FD not created", "You do not have enough free cash.", "bad");
+        return;
+      }
+      const rate = ticks >= 70 ? 0.12 : ticks >= 40 ? 0.08 : 0.05;
+      const maturity = round(amount * (1 + rate));
+      wallet.cash = round(wallet.cash - amount);
+      state.fds.push({ id: makeId("fd"), mode: state.mode, amount, maturity, startTick: state.tick, endTick: state.tick + ticks, rate });
+      delete state.draftInputs.fdAmount;
+      state.logs.push({ tick: state.tick, action: "FD CREATED", symbol: "FD", qty: ticks, price: null, total: amount });
+      save();
+      gameFeel("start");
+      toast("FD created", `${formatMoney(amount)} locked. Maturity value: ${formatMoney(maturity)}.`, "good");
+      renderAll();
+    }
+
+    function createSip() {
+      const symbol = document.getElementById("sipStock").value;
+      const amount = Math.max(100, Number(document.getElementById("sipAmount").value) || 0);
+      const every = Number(document.getElementById("sipEvery").value) || 10;
+      state.sips.push({ id: makeId("sip"), mode: state.mode, symbol, amount, every, nextTick: state.tick + every });
+      delete state.draftInputs.sipAmount;
+      state.logs.push({ tick: state.tick, action: "SIP STARTED", symbol, qty: "-", price: null, total: amount });
+      save();
+      gameFeel("start");
+      toast("SIP started", `${formatMoney(amount)} will invest into ${symbol} every ${every} ticks.`, "good");
+      renderTools();
+    }
+
+    function stopSip(id) {
+      state.sips = state.sips.filter((sip) => sip.id !== id);
+      save();
+      toast("SIP stopped", "Automatic investing has been paused.", "info");
+      renderTools();
+    }
+
+    function buyForSip(sip) {
+      const stock = state.stocks[sip.symbol];
+      const wallet = state.wallets[sip.mode];
+      if (!stock || wallet.cash < sip.amount) return false;
+      const qty = Math.max(1, Math.floor(sip.amount / stock.price));
+      const total = round(qty * stock.price);
+      if (wallet.cash < total) return false;
+      const newQty = stock.owned + qty;
+      stock.avg = round(((stock.avg * stock.owned) + total) / newQty);
+      stock.owned = newQty;
+      stock.invested = round(stock.avg * stock.owned);
+      wallet.cash = round(wallet.cash - total);
+      state.logs.push({ tick: state.tick, action: "SIP BUY", symbol: stock.symbol, qty, price: stock.price, total });
+      return true;
+    }
+
+    function processMoneyTools() {
+      state.reminders.forEach((reminder) => {
+        if (reminder.done) return;
+        const stock = state.stocks[reminder.symbol];
+        if (!stock) return;
+        const hit = reminder.direction === "above" ? stock.price >= reminder.price : stock.price <= reminder.price;
+        if (!hit) return;
+        reminder.done = true;
+        state.logs.push({ tick: state.tick, action: "REMINDER HIT", symbol: stock.symbol, qty: "-", price: stock.price, total: null });
+        gameFeel("win");
+        toast("Price reminder", `${stock.symbol} is now ${formatMoney(stock.price)}.`, "info");
+      });
+
+      state.fds = state.fds.filter((fd) => {
+        if (state.tick < fd.endTick) return true;
+        state.wallets[fd.mode].cash = round(state.wallets[fd.mode].cash + fd.maturity);
+        state.logs.push({ tick: state.tick, action: "FD MATURED", symbol: "FD", qty: "-", price: null, total: fd.maturity });
+        gameFeel("win");
+        toast("FD matured", `${formatMoney(fd.maturity)} added to ${fd.mode} cash.`, "good");
+        return false;
+      });
+
+      state.sips.forEach((sip) => {
+        if (state.tick < sip.nextTick) return;
+        const bought = buyForSip(sip);
+        sip.nextTick = state.tick + sip.every;
+        if (bought) toast("SIP invested", `${formatMoney(sip.amount)} tried buying ${sip.symbol}.`, "good");
+      });
+    }
+
+    function trade(action) {
+      const stock = currentStock();
+      const input = document.getElementById("qtyInput");
+      const qty = Math.max(1, Math.floor(Number(input.value) || 1));
+      state.orderQty[stock.symbol] = qty;
+      const wallet = state.wallets[stock.market];
+      const total = round(qty * stock.price);
+      if (action === "BUY") {
+        if (wallet.cash < total) {
+          gameFeel("bad");
+          toast("Not enough cash for that order.", "bad");
+          return;
+        }
+        const newQty = stock.owned + qty;
+        stock.avg = round(((stock.avg * stock.owned) + total) / newQty);
+        stock.owned = newQty;
+        stock.invested = round(stock.avg * stock.owned);
+        wallet.cash = round(wallet.cash - total);
+      } else {
+        if (stock.owned < qty) {
+          gameFeel("bad");
+          toast("You do not own enough units to sell.", "bad");
+          return;
+        }
+        const costSold = round(stock.avg * qty);
+        wallet.cash = round(wallet.cash + total);
+        wallet.realized = round(wallet.realized + total - costSold);
+        stock.owned -= qty;
+        stock.invested = stock.owned ? round(stock.avg * stock.owned) : 0;
+        if (!stock.owned) stock.avg = 0;
+      }
+      state.logs.push({ tick: state.tick, action, symbol: stock.symbol, qty, price: stock.price, total });
+      checkAchievements();
+      renderAll();
+      save();
+      gameFeel(action === "SELL" ? "sell" : "buy");
+      toast(`${action} ${qty} ${stock.symbol} for ${formatMoney(total)}.`, action === "BUY" ? "good" : "info");
+    }
+
+    function tickMarket() {
+      state.tick += 1;
+      let event = null;
+      if (state.tick % 20 === 0) event = createNewsEvent();
+
+      Object.values(state.stocks).forEach((stock) => {
+        stock.previous = stock.price;
+        const drift = stock.momentum * 0.22;
+        const eventBoost = event && (event.market === stock.market || event.sector === stock.sector) ? event.impact : 0;
+        const change = randomNormal() * stock.volatility + drift + eventBoost;
+        stock.momentum = stock.momentum * 0.8 + change * 0.2;
+        stock.price = round(Math.max(3, stock.price * (1 + change)));
+        stock.high = Math.max(stock.high, stock.price);
+        stock.low = Math.min(stock.low, stock.price);
+        stock.history.push(stock.price);
+        if (stock.history.length > 90) stock.history.shift();
+      });
+
+      processMoneyTools();
+      if (state.tick % 30 === 0) payDividends();
+      checkAchievements();
+      renderAll();
+      save();
+    }
+
+    function createNewsEvent() {
+      const allSectors = Object.values(state.stocks).map((s) => s.sector);
+      const sector = allSectors[Math.floor(Math.random() * allSectors.length)];
+      const positive = Math.random() > 0.45;
+      const impact = (positive ? 1 : -1) * (0.008 + Math.random() * 0.016);
+      const event = {
+        sector,
+        market: Math.random() > 0.55 ? state.mode : null,
+        impact,
+        text: `${sector}: ${positive ? "bullish news" : "pressure wave"}`
+      };
+      state.lastEvent = event.text;
+      state.logs.push({ tick: state.tick, action: "NEWS", symbol: sector, qty: "-", price: null, total: null });
+      toast(event.text, positive ? "good" : "bad");
+      return event;
+    }
+
+    function payDividends() {
+      Object.values(state.stocks).forEach((stock) => {
+        if (!stock.owned) return;
+        const payout = round(stock.owned * stock.price * (stock.market === "pro" ? 0.003 : 0.006));
+        state.wallets[stock.market].cash = round(state.wallets[stock.market].cash + payout);
+        state.logs.push({ tick: state.tick, action: "DIVIDEND", symbol: stock.symbol, qty: stock.owned, price: stock.price, total: payout });
+      });
+      toast("Dividends paid on open positions.", "good");
+    }
+
+    function checkAchievements() {
+      unlock("first_trade", state.logs.some((l) => l.action === "BUY" || l.action === "SELL"));
+      unlock("five_trades", state.logs.filter((l) => l.action === "BUY" || l.action === "SELL").length >= 5);
+      unlock("profit_1k", totalPL("arcade") + totalPL("pro") >= 1000);
+      unlock("diversified", Object.values(state.stocks).filter((s) => s.owned > 0).length >= 3);
+      unlock("planner", state.reminders.length + state.fds.length + state.sips.length > 0);
+      unlock("arcade_goal", netWorth("arcade") >= goals.arcade);
+      unlock("pro_goal", netWorth("pro") >= goals.pro);
+    }
+
+    function unlock(id, condition) {
+      if (!condition || state.unlocked[id]) return;
+      state.unlocked[id] = true;
+      const achievement = achievements.find((a) => a[0] === id);
+      if (achievement) {
+        gameFeel("win");
+        toast("Reward unlocked", achievement[1], "good");
+      }
+    }
+
+    function drawChart(canvas, stock) {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+      const pad = 16;
+      const values = stock.history;
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const range = Math.max(1, max - min);
+      const css = getComputedStyle(document.body);
+      const line = stock.price >= stock.previous ? css.getPropertyValue("--good").trim() : css.getPropertyValue("--bad").trim();
+      const grid = css.getPropertyValue("--line").trim();
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = grid;
+      for (let i = 0; i < 5; i += 1) {
+        const y = pad + ((h - pad * 2) / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+      }
+
+      const points = values.map((value, index) => {
+        const x = pad + (index / (values.length - 1)) * (w - pad * 2);
+        const y = h - pad - ((value - min) / range) * (h - pad * 2);
+        return [x, y];
+      });
+
+      ctx.beginPath();
+      points.forEach(([x, y], index) => {
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(w - pad, h - pad);
+      ctx.lineTo(pad, h - pad);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, pad, 0, h);
+      grad.addColorStop(0, line + "55");
+      grad.addColorStop(1, line + "05");
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      points.forEach(([x, y], index) => {
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = line;
+      ctx.stroke();
+
+      const last = points[points.length - 1];
+      ctx.beginPath();
+      ctx.arc(last[0], last[1], 4, 0, Math.PI * 2);
+      ctx.fillStyle = line;
+      ctx.fill();
+    }
+
+    function renderAll() {
+      renderStats();
+      renderNav();
+      if (document.activeElement && document.activeElement.matches("input, select")) return;
+      renderView();
+    }
+
+    function topMover() {
+      const stock = Object.values(state.stocks).reduce((best, s) => {
+        const move = Math.abs((s.price - s.previous) / s.previous);
+        return !best || move > best.move ? { symbol: s.symbol, move } : best;
+      }, null);
+      return stock ? stock.symbol : "-";
+    }
+
+    function formatCompact(value) {
+      if (value >= 1000) return "Rs. " + Math.round(value).toLocaleString("en-IN");
+      return "Rs. " + value.toFixed(1);
+    }
+
+    function toast(title, messageOrType = "info", maybeType) {
+      const legacyTypes = ["info", "good", "bad"];
+      const isLegacy = legacyTypes.includes(messageOrType) && !maybeType;
+      const message = isLegacy ? "" : messageOrType;
+      const type = isLegacy ? messageOrType : (maybeType || "info");
+      const node = document.createElement("div");
+      node.className = "toast " + type;
+      node.innerHTML = `<strong>${escapeHtml(title)}</strong>${message ? `<span>${escapeHtml(message)}</span>` : ""}`;
+      el.toastStack.appendChild(node);
+      setTimeout(() => node.remove(), 3600);
+    }
+
+    function haptic(pattern = 18) {
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    function burst(x = window.innerWidth / 2, y = 110, color = "var(--brand)") {
+      for (let i = 0; i < 18; i += 1) {
+        const spark = document.createElement("span");
+        spark.className = "spark";
+        spark.style.left = x + "px";
+        spark.style.top = y + "px";
+        spark.style.background = color;
+        spark.style.setProperty("--dx", (Math.random() * 180 - 90) + "px");
+        spark.style.setProperty("--dy", (Math.random() * 150 - 110) + "px");
+        document.body.appendChild(spark);
+        setTimeout(() => spark.remove(), 800);
+      }
+    }
+
+    function gameFeel(kind) {
+      if (kind === "bad") haptic([30, 40, 30]);
+      else if (kind === "win") haptic([20, 30, 20, 30, 60]);
+      else haptic(18);
+      if (kind !== "bad") burst(undefined, undefined, kind === "sell" ? "var(--gold)" : "var(--brand)");
+    }
+
+    function exportSave() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "investoplay-save.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast("Save file exported.", "info");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function cycleTheme() {
+      document.body.classList.remove(themes[state.themeIndex]);
+      state.themeIndex = (state.themeIndex + 1) % themes.length;
+      if (themes[state.themeIndex] !== "light") document.body.classList.add(themes[state.themeIndex]);
+      save();
+    }
+
+    function showGuide() {
+      el.viewTitle.textContent = "Guide";
+      el.viewSubtitle.textContent = "Rules, modes, and what was upgraded";
+      el.viewBody.innerHTML = document.getElementById("guideTemplate").innerHTML;
+      state.view = "guide";
+      setViewTabs();
+    }
+
+    el.openLoginBtn.addEventListener("click", openLoginPage);
+    el.ribbonLoginBtn.addEventListener("click", openLoginPage);
+    el.quickPlayBtn.addEventListener("click", () => start("Guest"));
+    el.loginGuestBtn.addEventListener("click", () => start("Guest"));
+    el.backHomeBtn.addEventListener("click", openHomePage);
+    el.startBtn.addEventListener("click", () => start(el.playerName.value, el.playerPin.value));
+    el.arcadeModeBtn.addEventListener("click", () => setMode("arcade"));
+    el.proModeBtn.addEventListener("click", () => setMode("pro"));
+    el.tradeViewBtn.addEventListener("click", () => setView("trade"));
+    el.portfolioViewBtn.addEventListener("click", () => setView("portfolio"));
+    el.logsViewBtn.addEventListener("click", () => setView("logs"));
+    el.toolsViewBtn.addEventListener("click", () => setView("tools"));
+    el.goalsViewBtn.addEventListener("click", () => setView("goals"));
+    el.themeBtn.addEventListener("click", cycleTheme);
+    el.helpBtn.addEventListener("click", showGuide);
+    el.homeBtn.addEventListener("click", openHomePage);
+    el.saveBtn.addEventListener("click", () => {
+      save();
+      gameFeel("start");
+      toast("Saved", "Your game is saved on this browser.", "good");
+    });
+    el.resetBtn.addEventListener("click", resetGame);
+    window.addEventListener("resize", () => {
+      if (state.view === "trade") renderTrade();
+    });
+
+    initStocks();
+    const hadSave = loadSave();
+    if (themes[state.themeIndex] !== "light") document.body.classList.add(themes[state.themeIndex]);
+    if (hadSave) {
+      el.playerName.value = state.player;
+      el.playerPin.value = state.pin || "";
+      el.homeModal.classList.remove("hidden");
+      el.loginModal.classList.add("hidden");
+      el.appShell.classList.add("hidden");
+    }
+    renderAll();
+    setInterval(tickMarket, 2600);
   </script>
 </body>
 </html>
